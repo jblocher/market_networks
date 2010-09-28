@@ -1,7 +1,7 @@
 /* *************************************************************************/
 /* CREATED BY:      Jesse Blocher (UNC-Chapel Hill)                                               
 /* MODIFIED BY:                                                    
-/* DATE CREATED:    Aug 2010                                                                                                            
+/* DATE CREATED:    Sept 2010                                                                                                            
 /* PROG NAME:       eq_name_match.sas                                                              
 /* Project:         Market Interconnectedness and Fires Sales, Momentum
 /* This File:       Match the names with no cusips to names in CRSP
@@ -39,21 +39,7 @@ run;
 * NOTE: The data set MKN_WORK.COMBINED_MATCHED_DATA has 612365 observations and 14 variables;
 
 
-/*
-SELECT *
-FROM	(SELECT distinct t1.person,t2.outcome FROM sample AS t1,test AS t2
-WHERE t1.person=t2.subject) 
 
-WHERE outcome in
-(SELECT distinct diagnose FROM special WHERE agent=“VIRUS” )
-*/
-
-
-
-
-
-
-/*
 * should have identical columns but now cusip is updated;
 data name_matched_data (drop = ncusip);
 	set mkn_work.combined_matched_data (drop = comnam totalscore);
@@ -97,8 +83,10 @@ quit;
 NOTE: The data set MKTNET.EQUITIES_VALID_CUSIP has 45696912 observations and 32 variables.
 plus name_matched_data above
 */
+
 /*
 * wont work yet - valid cusip has all holdings, name_matched_data is pared;
+* need to merge pared down data with full holdings data by rowid;
 data mktnet.valid_cusip_add_crsp_cusip;
 	set mktnet.equities_valid_cusip;
 run;

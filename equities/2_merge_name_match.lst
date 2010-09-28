@@ -1,0 +1,51 @@
+                                           The SAS System      15:01 Tuesday, September 28, 2010   1
+
+                                       The CONTENTS Procedure
+
+Data Set Name        WORK.EQUIVALENT_NAME_MATCHED_DATA                     Observations          0  
+Member Type          DATA                                                  Variables             12 
+Engine               V9                                                    Indexes               0  
+Created              Tue, Sep 28, 2010 03:02:46 PM                         Observation Length    944
+Last Modified        Tue, Sep 28, 2010 03:02:46 PM                         Deleted Observations  0  
+Protection                                                                 Compressed            NO 
+Data Set Type                                                              Sorted                NO 
+Label                                                                                               
+Data Representation  SOLARIS_X86_64, LINUX_X86_64,                                                  
+                     ALPHA_TRU64, LINUX_IA64                                                        
+Encoding             latin1  Western (ISO)                                                          
+
+
+                                 Engine/Host Dependent Information
+
+Data Set Page Size          65536                                                                   
+Number of Data Set Pages    1                                                                       
+First Data Page             1                                                                       
+Max Obs per Page            69                                                                      
+Obs in First Data Page      0                                                                       
+Number of Data Set Repairs  0                                                                       
+Filename                    /largefs/saswork/SAS_workCD8D00003BF2_bc14-n01.isis.                    
+                            unc.edu/equivalent_name_matched_data.sas7bdat                           
+Release Created             9.0201M0                                                                
+Host Created                Linux                                                                   
+Inode Number                1223362                                                                 
+Access Permission           rw-r-----                                                               
+Owner Name                  jabloche                                                                
+File Size (bytes)           73728                                                                   
+
+
+                            Alphabetic List of Variables and Attributes
+ 
+           #    Variable        Type    Len    Format       Informat    Label
+
+           7    CompA           Char    200                                              
+          11    CompB           Char    200                                              
+           8    FirstLetterA    Char    200                                              
+          12    FirstLetterB    Char    200                                              
+           9    NAMEDT          Num       8    YYMMDDN8.    YYMMDD6.    Names Date       
+          10    NAMEENDT        Num       8    YYMMDDN8.    YYMMDD6.    Names Ending Date
+           3    cusip           Char      9                             9 digit CUSIP    
+           1    fundid          Char     10                             Fund ID          
+           2    port_date       Num       8    YYMMDD10.                Porfolio Date    
+           5    rowid           Num       8                                              
+           4    security        Char     80                             Security Name    
+           6    year            Num       8                                              
