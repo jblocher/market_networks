@@ -1,0 +1,4 @@
+proc univariate data = nostock_summary;
+where 0 < pct_no_stock < 1;
+histogram pct_no_stock;
+run;

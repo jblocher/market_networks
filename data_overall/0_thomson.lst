@@ -1,0 +1,176 @@
+                                           The SAS System        14:20 Thursday, August 26, 2010   1
+
+                                       The CONTENTS Procedure
+
+Data Set Name        THOMSON.S12                                      Observations          52937306
+Member Type          DATA                                             Variables             21      
+Engine               V9                                               Indexes               0       
+Created              Monday, February 22, 2010 09:13:02 AM            Observation Length    208     
+Last Modified        Monday, February 22, 2010 11:52:00 AM            Deleted Observations  0       
+Protection                                                            Compressed            NO      
+Data Set Type                                                         Sorted                YES     
+Label                Thomson-Reuters Mutual Fund Holdings                                           
+Data Representation  HP_UX_64, RS_6000_AIX_64, SOLARIS_64, HP_IA64                                  
+Encoding             latin1  Western (ISO)                                                          
+
+
+                                 Engine/Host Dependent Information
+
+                 Data Set Page Size          24576                                 
+                 Number of Data Set Pages    452457                                
+                 First Data Page             1                                     
+                 Max Obs per Page            117                                   
+                 Obs in First Data Page      94                                    
+                 Number of Data Set Repairs  0                                     
+                 Filename                    /largefs/jabloche/thomson/s12.sas7bdat
+                 Release Created             9.0101M3                              
+                 Host Created                SunOS                                 
+                 Inode Number                17235593                              
+                 Access Permission           rw-------                             
+                 Owner Name                  jabloche                              
+                 File Size (bytes)           11119591424                           
+
+
+                             Alphabetic List of Variables and Attributes
+ 
+        #    Variable    Type    Len    Format    Label
+
+        6    assets      Num       8              End of Qtr Assets (x10000)                 
+       12    change      Num       8              Net Change in Shares Since Prior Report    
+        9    country     Char     30              Country                                    
+       10    cusip       Char      8              Cusip                                      
+       15    exchcd      Char      1              Exchange Code                              
+        1    fdate       Num       8    DATE9.    File Date                                  
+        3    fundname    Char     24              Fund Name                                  
+        2    fundno      Num       8              Fund Number                                
+       17    indcode     Num       8              Industry Code                              
+        7    ioc         Num       8              Investment Objective Code                  
+        4    mgrcoab     Char      6              Management Company Abbreviation            
+       19    prc         Num       8              Share Price, as of FDATE                   
+        8    prdate      Num       8    DATE9.    Prior Report Date                          
+        5    rdate       Num       8    DATE9.    Report Date                                
+       11    shares      Num       8              Shares Held at End of Qtr                  
+       20    shrout1     Num       8              Shares Outstanding in Millions, as of FDATE
+       21    shrout2     Num       8              Shares Outstanding in 1000s, as of FDATE   
+       16    stkcd       Char      1              Stock Class Code                           
+       18    stkcdesc    Char      3              Stock Class Description                    
+       13    stkname     Char     28              Stock Name                                 
+       14    ticker      Char      4              Ticker Symbol                              
+
+
+                                         Sort Information
+
+                              Sortedby       fdate fundno cusip rdate
+                              Validated      NO                      
+                              Character Set  ASCII                   
+                                           The SAS System        14:20 Thursday, August 26, 2010   2
+
+                                                      count_    count_
+                              Obs    month    year    fundno    fundid
+
+                                1       6     1983       866        3 
+                                2       9     1983       896        1 
+                                3      12     1983       919       22 
+                                4       3     1984       923       55 
+                                5       6     1984       913      137 
+                                6       9     1984       968      123 
+                                7      12     1984       959      132 
+                                8       3     1985       963      132 
+                                9       6     1985       964      153 
+                               10       9     1985      1015      161 
+                               11      12     1985      1026      103 
+                               12       3     1986      1049      194 
+                               13       6     1986      1145      210 
+                               14       9     1986      1175      222 
+                               15      12     1986      1205      210 
+                               16       3     1987      1238      106 
+                               17       6     1987      1247      272 
+                               18       9     1987      1287      138 
+                               19      12     1987      1285      272 
+                               20       3     1988      1260      134 
+                               21       6     1988      1270      264 
+                               22       9     1988      1362      173 
+                               23      12     1988      1319      360 
+                               24       3     1989      1320      408 
+                               25       6     1989      1321      488 
+                               26       9     1989      1355      358 
+                               27      12     1989      1401      531 
+                               28       3     1990      1193      454 
+                               29       6     1990      1331      487 
+                               30       9     1990      1576      421 
+                               31      12     1990      1654      654 
+                               32       3     1991      1732      366 
+                               33       6     1991      1783      604 
+                               34       9     1991      1901      518 
+                               35      12     1991      1970      760 
+                               36       3     1992      2026      584 
+                               37       6     1992      2027      860 
+                               38       9     1992      2028      894 
+                               39      12     1992      2103     1018 
+                               40       3     1993      2129      730 
+                               41       6     1993      2129     1035 
+                               42       9     1993      2355      803 
+                               43      12     1993      2562     1174 
+                               44       3     1994      2787      860 
+                               45       6     1994      2859     1135 
+                               46       9     1994      2759      854 
+                               47      12     1994      2840     1345 
+                               48       3     1995      5752     1091 
+                               49       6     1995      5785     1319 
+                               50       9     1995      5685      954 
+                               51      12     1995      6755     1330 
+                               52       3     1996      6600      938 
+                               53       6     1996      7037     1346 
+                               54       9     1996      6302     1354 
+                               55      12     1996      9024     1498 
+                               56       3     1997      9102     1353 
+                               57       6     1997      9091     1724 
+                               58       9     1997      7172     1794 
+                               59      12     1997      7143     2061 
+                               60       3     1998      7368     2114 
+                               61       6     1998      7603     2593 
+                               62       9     1998      7808     2747 
+                               63      12     1998      8950     3119 
+                               64       3     1999     10376     2643 
+                               65       6     1999     11662     2804 
+                               66       9     1999     11780     2652 
+                               67      12     1999     12180     3202 
+                               68       3     2000     12652     3283 
+                               69       6     2000     13539     3300 
+                               70       9     2000     13515     3458 
+                               71      12     2000     14186     3847 
+                               72       3     2001     14455     3968 
+                               73       6     2001     15653     4012 
+                               74       9     2001     16273     3970 
+                               75      12     2001     16371     3891 
+                               76       3     2002     16520     4137 
+                               77       6     2002     16871     5000 
+                               78       9     2002     16760     5113 
+                               79      12     2002     16789     5239 
+                               80       3     2003     16659     5554 
+                               81       6     2003     16488     5639 
+                               82       9     2003     16854     5520 
+                               83      12     2003     16483     5381 
+                               84       3     2004     16173     5533 
+                               85       6     2004     15944     5529 
+                               86       9     2004     15885     5440 
+                               87      12     2004     15708     5434 
+                               88       3     2005     18327     5272 
+                               89       6     2005     21283     5418 
+                               90       9     2005     21598     5263 
+                               91      12     2005     21085     5663 
+                               92       3     2006     21631     5360 
+                               93       6     2006     21320     5746 
+                               94       9     2006     20483     5652 
+                               95      12     2006     19941     5736 
+                               96       3     2007     19123     5810 
+                               97       6     2007     19935     6033 
+                               98       9     2007     19899     6016 
+                               99      12     2007     19705     6162 
+                              100       3     2008     19166     6209 
+                              101       6     2008     19053     6257 
+                              102       9     2008     21465     6221 
+                              103      12     2008     20927     6293 
+                              104       3     2009     19108     6172 
+                              105       6     2009     18995     6194 
+                              106       9     2009     18367     6128 

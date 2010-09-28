@@ -1,0 +1,622 @@
+1                                                          The SAS System                          10:10 Tuesday, September 14, 2010
+
+NOTE: Copyright (c) 2002-2008 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.2 (TS1M0) 
+      Licensed to UNIVERSITY OF NORTH CAROLINA CHAPEL HILL - T&R, Site 0070084073.
+NOTE: This session is executing on the Linux 2.6.18-194.el5 platform.
+
+
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+NOTE: SAS initialization used:
+      real time           0.13 seconds
+      cpu time            0.03 seconds
+      
+1          /* *************************************************************************/
+2          /* CREATED BY:      Jesse Blocher (UNC-Chapel Hill)
+3          /* MODIFIED BY:
+4          /* DATE CREATED:    Aug 2010
+5          /* PROG NAME:       eq_name_match.sas
+6          /* Project:         Market Interconnectedness and Fires Sales, Momentum
+7          /* This File:       Match the names with no cusips to names in CRSP - JOBARRAY FILE
+8          /************************************************************************************/
+9          
+10         %include 'marketnet_header.sas'; *header file with basic options and libraries;
+NOTE: Libref MORN was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/morningstar
+NOTE: Libref MS_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/ms_work
+NOTE: Libref MKTNET was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet
+NOTE: Libref MKN_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet_work
+NOTE: Libref THOMSON was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/thomson
+23         
+24         
+25         /* Datasets required to run:
+26          * mktnet.equities_raw				: Equities with no cusips; security cusip port_date fundid
+26       ! rowid
+27          * mktnet.crsp_raw					: CRSP msenames Data; namedt nameendt comnam ncusip shrcd
+28         
+29          */
+30         
+31         /* Datasets Produced:
+32          * mkn_work.cumulative&n			: where n = 1 to 317, which is the number of port_dates to
+32       ! iterate
+33          */
+34         
+35         /* testing */
+36         proc freq data = mktnet.equities_raw;
+37         tables port_date;
+38         run;
+
+NOTE: There were 1020331 observations read from the data set MKTNET.EQUITIES_RAW.
+NOTE: The PROCEDURE FREQ printed page 1.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           3.42 seconds
+      cpu time            0.47 seconds
+      
+
+39         
+40         proc freq data = mktnet.crsp_raw;
+NOTE: Data file MKTNET.CRSP_RAW.DATA is in a format that is native to another host, or the file 
+      encoding does not match the session encoding. Cross Environment Data Access will be used, 
+      which might require additional CPU resources and might reduce performance.
+41         tables namedt nameendt;
+42         run;
+
+NOTE: There were 68653 observations read from the data set MKTNET.CRSP_RAW.
+NOTE: The PROCEDURE FREQ printed page 2.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.50 seconds
+      cpu time            0.34 seconds
+      
+
+43         
+44         
+45         * run this one time prior to jobarray;
+46         proc sort data = mktnet.equities_raw out = mktnet.date_list nodupkey;
+47         by port_date;
+48         run;
+
+NOTE: There were 1020331 observations read from the data set MKTNET.EQUITIES_RAW.
+NOTE: 1020014 observations with duplicate key values were deleted.
+NOTE: The data set MKTNET.DATE_LIST has 317 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.83 seconds
+      cpu time            0.75 seconds
+      
+
+49         
+50         %let n = 2;
+51         * end testing;
+52         
+53         * the real deal;
+54         **%let n = %sysget(LSB_JOBINDEX); *sysget is the jobarray function to get index from unix
+54       !  system;
+55         
+56         data _null_;
+57         set mktnet.date_list (keep = port_date);
+58         if _N_ = &n then do;
+SYMBOLGEN:  Macro variable N resolves to 2
+59         	call symput('thisdate', PUT(port_date, z8.));
+60         	call symput('thisdatef', PUT(port_date, yymmdd10.));
+61         	end;
+62         run;
+
+NOTE: There were 317 observations read from the data set MKTNET.DATE_LIST.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+63         
+64         data eq_match_date (drop = datec);
+65         	set mktnet.equities_raw;
+66         	where port_date = &thisdate;
+SYMBOLGEN:  Macro variable THISDATE resolves to 00008673
+67         	* test to be sure it is resolving properly and can read in the log;
+68         	datec = &thisdatef;
+SYMBOLGEN:  Macro variable THISDATEF resolves to 1983-09-30
+69         run;
+
+NOTE: There were 1 observations read from the data set MKTNET.EQUITIES_RAW.
+      WHERE port_date=8673;
+NOTE: The data set WORK.EQ_MATCH_DATE has 1 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.15 seconds
+      cpu time            0.14 seconds
+      
+
+70         proc print data = eq_match_date (obs = 100); run;
+
+NOTE: There were 1 observations read from the data set WORK.EQ_MATCH_DATE.
+NOTE: The PROCEDURE PRINT printed page 3.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+71         
+72         data crsp_match_date;
+73         	set mktnet.crsp_raw;
+NOTE: Data file MKTNET.CRSP_RAW.DATA is in a format that is native to another host, or the file 
+      encoding does not match the session encoding. Cross Environment Data Access will be used, 
+      which might require additional CPU resources and might reduce performance.
+74         	if (namedt <= &thisdate <= nameendt) then output;
+SYMBOLGEN:  Macro variable THISDATE resolves to 00008673
+75         run;
+
+NOTE: There were 68653 observations read from the data set MKTNET.CRSP_RAW.
+NOTE: The data set WORK.CRSP_MATCH_DATE has 5836 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.10 seconds
+      cpu time            0.08 seconds
+      
+
+76         
+77         %include '/netscr/jabloche/util/company_macro.sas';
+437        %mfmatch(dataset1=eq_match_date,var1=security,dataset2=crsp_match_date,var2=comnam,out_ds
+437      ! =mkn_work.cumulative&n.);
+SYMBOLGEN:  Macro variable N resolves to 2
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   Data Dummy1;
+SYMBOLGEN:  Macro variable DATASET1 resolves to eq_match_date
+MPRINT(MFMATCH):   Set eq_match_date NOBS=nobs1;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   CALL SYMPUT("OBS",nobs1);
+MPRINT(MFMATCH):   ;
+SYMBOLGEN:  Macro variable VAR1 resolves to security
+MPRINT(MFMATCH):   Attrib security CompA length=$200.;
+WARNING: Length of character variable security has already been set. 
+         Use the LENGTH statement as the very first statement in the DATA STEP to declare the 
+         length of a character variable.
+SYMBOLGEN:  Macro variable VAR1 resolves to security
+MPRINT(MFMATCH):   Comp1=UPCASE(security);
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,' INTL',' INTERNATIONAL');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,' LTD',' LIMITED');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'CL A','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'CL B','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'CL C','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'-ADR','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'-LP','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'-SP','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,' ADR','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'-REDH','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'-SPON','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'-OLD','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,' (NEW)','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'-REDH','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/NEW','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,' L P','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/PRED','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/OLD','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/AL','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/AK','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/AZ','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/AR','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/CA','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/CO','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/CT','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/DE','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/DC','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/FL','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/FLA','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/GA','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/HI','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/IA','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/ID','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/IL','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/IN','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/KS','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/KY','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/LA','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/MA','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/MD','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/ME','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/MI','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/MN','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/MO','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/MS','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/MT','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/NC','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/ND','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/NE','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/NH','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/NJ','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/NM','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/NV','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/NY','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/OH','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/OK','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/OR','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/PA','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/RI','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/SC','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/SD','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/TN','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/TX','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/UT','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/VA','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/VT','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/WA','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/WV','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/WI','');
+MPRINT(MFMATCH):   Comp1=TRANWRD(Comp1,'/WY','');
+MPRINT(MFMATCH):   text1=scan(Comp1,1,' ,');
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   text2=scan(Comp1,2,' ,');
+MPRINT(MFMATCH):   text3=scan(Comp1,3,' ,');
+MPRINT(MFMATCH):   text4=scan(Comp1,4,' ,');
+MPRINT(MFMATCH):   text5=scan(Comp1,5,' ,');
+MPRINT(MFMATCH):   text6=scan(Comp1,6,' ,');
+MPRINT(MFMATCH):   text7=scan(Comp1,7,' ,');
+MPRINT(MFMATCH):   text8=scan(Comp1,8,' ,');
+MPRINT(MFMATCH):   text9=scan(Comp1,9,' ,');
+MPRINT(MFMATCH):   text10=scan(Comp1,10,' ,');
+MPRINT(MFMATCH):   text11=scan(Comp1,11,' ,');
+MPRINT(MFMATCH):   text12=scan(Comp1,12,' ,');
+MPRINT(MFMATCH):   text13=scan(Comp1,13,' ,');
+MPRINT(MFMATCH):   text14=scan(Comp1,14,' ,');
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   array text (14) text1 text2 text3 text4 text5 text6 text7 text8 text9 text10 
+text11 text12 text13 text14;
+MPRINT(MFMATCH):   Do i=1 to 14;
+MPRINT(MFMATCH):   If text(i)='INC.' THEN text(i)='';
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   If text(i)='INC' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='CO.' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='CO' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='INC.' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='INC' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='CORP' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='CORP.' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LTD' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LTD.' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LP' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LP.' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LLC' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LLC.' THEN text(i)='';
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   End;
+MPRINT(MFMATCH):   CompA=compress(trim(text1)||trim(text2)||trim(text3)||trim(text4)|| 
+trim(text5)||trim(text6)||trim(text7)||trim(text8) ||trim(text9) 
+||trim(text10)||trim(text11)||trim(text12)|| trim(text13)||trim(text14),' ,-/');
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   lenA=length(trim(CompA));
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   FirstLetterA=substr(CompA,1,1);
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   recno=_n_;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   Drop i Comp1 text1 text2 text3 text4 text5 text6 text7 text8 text9 text10 text11 
+text12 text13 text14;
+MPRINT(MFMATCH):   ;
+
+NOTE: Numeric values have been converted to character values at the places given by: 
+      (Line):(Column).
+      437:123   
+NOTE: There were 1 observations read from the data set WORK.EQ_MATCH_DATE.
+NOTE: The data set WORK.DUMMY1 has 1 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.01 seconds
+      
+
+MPRINT(MFMATCH):   Data Dummy2;
+SYMBOLGEN:  Macro variable DATASET2 resolves to crsp_match_date
+MPRINT(MFMATCH):   Set crsp_match_date;
+SYMBOLGEN:  Macro variable VAR2 resolves to comnam
+MPRINT(MFMATCH):   Attrib comnam CompB length=$200.;
+WARNING: Length of character variable COMNAM has already been set. 
+         Use the LENGTH statement as the very first statement in the DATA STEP to declare the 
+         length of a character variable.
+SYMBOLGEN:  Macro variable VAR2 resolves to comnam
+MPRINT(MFMATCH):   Comp2=UPCASE(comnam);
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,' INTL',' INTERNATIONAL');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,' LTD',' LIMITED');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'CL A','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'CL B','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'CL C','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'-ADR','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'-LP','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'-SP','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,' ADR','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'-REDH','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'-SPON','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'-OLD','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,' (NEW)','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'-REDH','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/NEW','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,' L P','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/PRED','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/OLD','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/AL','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/AK','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/AZ','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/AR','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/CA','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/CO','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/CT','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/DE','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/DC','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/FL','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/FLA','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/GA','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/HI','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/IA','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/ID','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/IL','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/IN','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/KS','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/KY','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/LA','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/MA','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/MD','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/ME','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/MI','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/MN','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/MO','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/MS','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/MT','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/NC','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/ND','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/NE','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/NH','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/NJ','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/NM','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/NV','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/NY','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/OH','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/OK','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/OR','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/PA','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/RI','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/SC','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/SD','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/TN','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/TX','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/UT','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/VA','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/VT','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/WA','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/WV','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/WI','');
+MPRINT(MFMATCH):   Comp2=TRANWRD(Comp2,'/WY','');
+MPRINT(MFMATCH):   text1=scan(Comp2,1,' ,');
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   text2=scan(Comp2,2,' ,');
+MPRINT(MFMATCH):   text3=scan(Comp2,3,' ,');
+MPRINT(MFMATCH):   text4=scan(Comp2,4,' ,');
+MPRINT(MFMATCH):   text5=scan(Comp2,5,' ,');
+MPRINT(MFMATCH):   text6=scan(Comp2,6,' ,');
+MPRINT(MFMATCH):   text7=scan(Comp2,7,' ,');
+MPRINT(MFMATCH):   text8=scan(Comp2,8,' ,');
+MPRINT(MFMATCH):   text9=scan(Comp2,9,' ,');
+MPRINT(MFMATCH):   text10=scan(Comp2,10,' ,');
+MPRINT(MFMATCH):   text11=scan(Comp2,11,' ,');
+MPRINT(MFMATCH):   text12=scan(Comp2,12,' ,');
+MPRINT(MFMATCH):   text13=scan(Comp2,13,' ,');
+MPRINT(MFMATCH):   text14=scan(Comp2,14,' ,');
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   array text (14) text1 text2 text3 text4 text5 text6 text7 text8 text9 text10 
+text11 text12 text13 text14;
+MPRINT(MFMATCH):   Do i=1 to 14;
+MPRINT(MFMATCH):   If text(i)='INC.' THEN text(i)='';
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   If text(i)='INC' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='CO.' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='CO' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='INC.' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='INC' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='CORP' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='CORP.' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LTD' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LTD.' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LP' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LP.' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LLC' THEN text(i)='';
+MPRINT(MFMATCH):   If text(i)='LLC.' THEN text(i)='';
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   End;
+MPRINT(MFMATCH):   CompB=compress(trim(text1)||trim(text2)||trim(text3)||trim(text4)|| trim(text5) 
+||trim(text6)||trim(text7)||trim(text8) ||trim(text9) || trim(text10) 
+||trim(text11)||trim(text12)||trim(text13)||trim(text14),' ,-');
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   lenB=length(trim(CompB));
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   FirstLetterB=substr(CompB,1,1);
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   Drop i Comp2 text1 text2 text3 text4 text5 text6 text7 text8 text9 text10 text11 
+text12 text13 text14;
+MPRINT(MFMATCH):   ;
+SYMBOLGEN:  Macro variable OUT_DS resolves to mkn_work.cumulative2
+
+NOTE: There were 5836 observations read from the data set WORK.CRSP_MATCH_DATE.
+NOTE: The data set WORK.DUMMY2 has 5836 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.19 seconds
+      cpu time            0.18 seconds
+      
+
+MPRINT(MFMATCH):   Data mkn_work.cumulative2;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   Set Dummy1;
+MPRINT(MFMATCH):   If CompA='';
+SYMBOLGEN:  Macro variable OBS resolves to            1
+MPRINT(MFMATCH):   ;
+
+NOTE: There were 1 observations read from the data set WORK.DUMMY1.
+NOTE: The data set MKN_WORK.CUMULATIVE2 has 0 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.05 seconds
+      cpu time            0.00 seconds
+      
+
+MPRINT(MFMATCH):   Data Dummy3;
+MPRINT(MFMATCH):   Set Dummy1;
+SYMBOLGEN:  Macro variable B resolves to 1
+MPRINT(MFMATCH):   If recno=1;
+MPRINT(MFMATCH):   ;
+
+NOTE: There were 1 observations read from the data set WORK.DUMMY1.
+NOTE: The data set WORK.DUMMY3 has 1 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+MPRINT(MFMATCH):   DATA compare1;
+MPRINT(MFMATCH):   SET Dummy3;
+MPRINT(MFMATCH):   DO k=1 TO nobs2;
+MPRINT(MFMATCH):   SET Dummy2 NOBS=nobs2 POINT=k;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   If trim(FirstLetterA)=trim(FirstLetterB) Then do;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   Score1=0;
+MPRINT(MFMATCH):   Score2=0;
+MPRINT(MFMATCH):   Do m=1 to lenA;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   If m<=lenA-1 Then do;
+MPRINT(MFMATCH):   pair=substr(CompA,m,2);
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   If index(CompB,trim(pair))^=0 then score1=score1+1;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   end;
+MPRINT(MFMATCH):   end;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   Do n=1 to lenB;
+MPRINT(MFMATCH):   If n<=lenB-1 Then do;
+MPRINT(MFMATCH):   pair=substr(CompB,n,2);
+MPRINT(MFMATCH):   If index(CompA,trim(pair))^=0 then score2=score2+1;
+MPRINT(MFMATCH):   end;
+MPRINT(MFMATCH):   end;
+MPRINT(MFMATCH):   MatchPercent1=score1/(lenA-1);
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   MatchPercent2=score2/(lenB-1);
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   TotalScore=MatchPercent1*MatchPercent2;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   If TotalScore>.3 THEN OUTPUT;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   end;
+MPRINT(MFMATCH):   END;
+MPRINT(MFMATCH):   Stop;
+MPRINT(MFMATCH):   DROP pair m n;
+MPRINT(MFMATCH):   ;
+
+NOTE: There were 1 observations read from the data set WORK.DUMMY3.
+NOTE: The data set WORK.COMPARE1 has 0 observations and 22 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+MPRINT(MFMATCH):   PROC Sort Data=compare1 Out=compare1;
+SYMBOLGEN:  Macro variable VAR1 resolves to security
+SYMBOLGEN:  Macro variable VAR2 resolves to comnam
+MPRINT(MFMATCH):   By security comnam;
+NOTE: Input data set is empty.
+NOTE: The data set WORK.COMPARE1 has 0 observations and 22 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+MPRINT(MFMATCH):   Data compare3;
+MPRINT(MFMATCH):   set compare1;
+SYMBOLGEN:  Macro variable VAR1 resolves to security
+SYMBOLGEN:  Macro variable VAR2 resolves to comnam
+MPRINT(MFMATCH):   By security comnam;
+
+NOTE: There were 0 observations read from the data set WORK.COMPARE1.
+NOTE: The data set WORK.COMPARE3 has 0 observations and 22 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+MPRINT(MFMATCH):   PROC SORT Data=Compare3 Out=Compare3;
+SYMBOLGEN:  Macro variable VAR1 resolves to security
+MPRINT(MFMATCH):   By security TotalScore;
+
+NOTE: Input data set is empty.
+NOTE: The data set WORK.COMPARE3 has 0 observations and 22 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+MPRINT(MFMATCH):   Data compare4;
+MPRINT(MFMATCH):   Set compare3;
+SYMBOLGEN:  Macro variable VAR1 resolves to security
+MPRINT(MFMATCH):   By security;
+SYMBOLGEN:  Macro variable VAR1 resolves to security
+MPRINT(MFMATCH):   If Last.security=1;
+MPRINT(MFMATCH):   ;
+SYMBOLGEN:  Macro variable OUT_DS resolves to mkn_work.cumulative2
+
+NOTE: There were 0 observations read from the data set WORK.COMPARE3.
+NOTE: The data set WORK.COMPARE4 has 0 observations and 22 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+MPRINT(MFMATCH):   Data mkn_work.cumulative2;
+SYMBOLGEN:  Macro variable OUT_DS resolves to mkn_work.cumulative2
+MPRINT(MFMATCH):   Set mkn_work.cumulative2 Compare4;
+MPRINT(MFMATCH):   ;
+MPRINT(MFMATCH):   drop recno score1 score2 lenA lenB MatchPercent1 MatchPercent2;
+438        
+
+NOTE: There were 0 observations read from the data set MKN_WORK.CUMULATIVE2.
+NOTE: There were 0 observations read from the data set WORK.COMPARE4.
+NOTE: The data set MKN_WORK.CUMULATIVE2 has 0 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+439        proc print data = mkn_work.cumulative&n (obs = 100);
+SYMBOLGEN:  Macro variable N resolves to 2
+440        var fundid port_date security comnam compa compb totalscore ncusip;
+441        run;
+
+NOTE: No observations in data set MKN_WORK.CUMULATIVE2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           5.90 seconds
+      cpu time            2.07 seconds
+      

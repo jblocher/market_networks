@@ -1,0 +1,245 @@
+                                           The SAS System       10:56 Monday, September 13, 2010   1
+
+                                         The FREQ Procedure
+
+                                                         Cumulative    Cumulative
+                   port_year    Frequency     Percent     Frequency      Percent
+                   --------------------------------------------------------------
+                        1983         448        0.04           448         0.04  
+                        1984       10074        0.90         10522         0.94  
+                        1985       11409        1.01         21931         1.95  
+                        1986       14273        1.27         36204         3.22  
+                        1987       12678        1.13         48882         4.35  
+                        1988       10297        0.92         59179         5.26  
+                        1989       16076        1.43         75255         6.69  
+                        1990       15571        1.38         90826         8.08  
+                        1991       19300        1.72        110126         9.79  
+                        1992       25966        2.31        136092        12.10  
+                        1993       36948        3.29        173040        15.39  
+                        1994       44537        3.96        217577        19.35  
+                        1995       69536        6.18        287113        25.54  
+                        1996       65649        5.84        352762        31.38  
+                        1997       67960        6.04        420722        37.42  
+                        1998       69067        6.14        489789        43.56  
+                        1999       56665        5.04        546454        48.60  
+                        2000       67766        6.03        614220        54.63  
+                        2001       78350        6.97        692570        61.60  
+                        2002      263295       23.42        955865        85.02  
+                        2003      105047        9.34       1060912        94.36  
+                        2004        9213        0.82       1070125        95.18  
+                        2005        6928        0.62       1077053        95.80  
+                        2006        6454        0.57       1083507        96.37  
+                        2007        9892        0.88       1093399        97.25  
+                        2008       13642        1.21       1107041        98.46  
+                        2009       17286        1.54       1124327       100.00  
+
+
+                                          Asset Type Code
+ 
+                                                        Cumulative    Cumulative
+                    type_cd    Frequency     Percent     Frequency      Percent
+                    ------------------------------------------------------------
+                    E           1024216       91.10       1024216        91.10  
+                    EC             9877        0.88       1034093        91.97  
+                    EI            26256        2.34       1060349        94.31  
+                    EL            36396        3.24       1096745        97.55  
+                    EP             4217        0.38       1100962        97.92  
+                    EQ               13        0.00       1100975        97.92  
+                    ER             1185        0.11       1102160        98.03  
+                    EU             3394        0.30       1105554        98.33  
+                    EV              270        0.02       1105824        98.35  
+                    EW             1398        0.12       1107222        98.48  
+                    EX            17105        1.52       1124327       100.00  
+                                           The SAS System       10:56 Monday, September 13, 2010   2
+
+                                      The UNIVARIATE Procedure
+              Variable:  marketvalue  (Market Value of Shares as reported by manager)
+
+                                              Moments
+
+                  N                     1124327    Sum Weights            1124327
+                  Mean               3676380.91    Sum Observations    4.13345E12
+                  Std Deviation      26810148.3    Variance            7.18784E14
+                  Skewness           71.7426949    Kurtosis            15508.0029
+                  Uncorrected SS     8.23344E20    Corrected SS        8.08148E20
+                  Coeff Variation    729.253821    Std Error Mean      25284.4142
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean      3676381     Std Deviation           26810148
+                       Median     414000     Variance              7.18784E14
+                       Mode            0     Range                 1.04103E10
+                                             Interquartile Range      1776941
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t  145.4011    Pr > |t|    <.0001
+                          Sign           M    527847    Pr >= |M|   <.0001
+                          Signed Rank    S  3.003E11    Pr >= |S|   <.0001
+
+
+                                     Quantiles (Definition 5)
+ 
+                                     Quantile         Estimate
+
+                                     100% Max       7394315600
+                                     99%              56449734
+                                     95%              14187397
+                                     90%               6587500
+                                     75% Q3            1850016
+                                     50% Median         414000
+                                     25% Q1              73075
+                                     10%                  9840
+                                     5%                   1001
+                                     1%                -381375
+                                     0% Min        -3015965620
+
+
+                                        Extreme Observations
+ 
+                          -------Lowest-------        -------Highest------
+ 
+                                Value      Obs              Value      Obs
+
+                          -3015965620    1.1E6         3280358800   1.08E6
+                          -2313425200    1.1E6         3290767400   174304
+                          -1935624916   595177         6690644000   1.08E6
+                          -1880615880   1.09E6         7227840000   1.08E6
+                          -1817221506    1.1E6         7394315600   1.08E6
+                                           The SAS System       10:56 Monday, September 13, 2010   3
+
+                                      The UNIVARIATE Procedure
+                     Variable:  weight  (Portfolio Weight in percentage points)
+
+                                              Moments
+
+                  N                     1124327    Sum Weights            1124327
+                  Mean               0.67252779    Sum Observations     756141.15
+                  Std Deviation      7.88105411    Variance             62.111014
+                  Skewness            -171.5902    Kurtosis            53922.3991
+                  Uncorrected SS     70341553.8    Corrected SS        69833027.9
+                  Coeff Variation    1171.85554    Std Error Mean      0.00743255
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean     0.672528     Std Deviation            7.88105
+                       Median   0.293820     Variance                62.11101
+                       Mode     0.000000     Range                       4579
+                                             Interquartile Range      0.85231
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t  90.48409    Pr > |t|    <.0001
+                          Sign           M    526536    Pr >= |M|   <.0001
+                          Signed Rank    S  2.944E11    Pr >= |S|   <.0001
+
+
+                                     Quantiles (Definition 5)
+ 
+                                     Quantile         Estimate
+
+                                     100% Max       1644.80973
+                                     99%               5.60574
+                                     95%               2.63478
+                                     90%               1.80227
+                                     75% Q3            0.90584
+                                     50% Median        0.29382
+                                     25% Q1            0.05353
+                                     10%               0.00744
+                                     5%                0.00070
+                                     1%               -0.82732
+                                     0% Min        -2934.16765
+
+
+                                        Extreme Observations
+ 
+                            ------Lowest-----        ------Highest-----
+ 
+                               Value      Obs            Value      Obs
+
+                            -2934.17   1.03E6          485.546   1.08E6
+                            -2822.75   1.09E6          499.792   1.08E6
+                            -2263.35   1.08E6          552.357   1.08E6
+                            -2135.17   1.09E6          946.133   1.09E6
+                            -1831.39   1.07E6         1644.810   1.09E6
+                       Number of obs missing CUSIP and also description is 46                      4
+                                                                    10:56 Monday, September 13, 2010
+
+                                             count_desc
+                                             ----------
+                                                     43
+                       Number of obs missing CUSIP and also description is 46                      5
+                                                                    10:56 Monday, September 13, 2010
+
+                                      The UNIVARIATE Procedure
+                                       Variable:  validCusip
+
+                                              Moments
+
+                  N                    53349364    Sum Weights           53349364
+                  Mean               0.99999348    Sum Observations      53349016
+                  Std Deviation      0.00255402    Variance              6.523E-6
+                  Skewness           -391.53516    Kurtosis            153297.784
+                  Uncorrected SS       53349016    Corrected SS         347.99773
+                  Coeff Variation    0.25540325    Std Error Mean       3.4967E-7
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean     0.999993     Std Deviation            0.00255
+                       Median   1.000000     Variance                6.523E-6
+                       Mode     1.000000     Range                    1.00000
+                                             Interquartile Range            0
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t   2859817    Pr > |t|    <.0001
+                          Sign           M  26674508    Pr >= |M|   <.0001
+                          Signed Rank    S  7.115E14    Pr >= |S|   <.0001
+
+
+                                      Quantiles (Definition 5)
+ 
+                                       Quantile      Estimate
+
+                                       100% Max             1
+                                       99%                  1
+                                       95%                  1
+                                       90%                  1
+                                       75% Q3               1
+                                       50% Median           1
+                                       25% Q1               1
+                                       10%                  1
+                                       5%                   1
+                                       1%                   1
+                                       0% Min               0
+
+
+                                        Extreme Observations
+ 
+                                ----Lowest----        ----Highest---
+ 
+                                Value      Obs        Value      Obs
+
+                                    0   5.33E7            1   5.33E7
+                                    0   5.33E7            1   5.33E7
+                                    0   5.33E7            1   5.33E7
+                                    0   5.33E7            1   5.33E7
+                                    0   5.32E7            1   5.33E7

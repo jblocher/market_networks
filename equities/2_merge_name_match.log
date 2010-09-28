@@ -1,0 +1,161 @@
+1                                                          The SAS System                          14:15 Thursday, September 2, 2010
+
+NOTE: Copyright (c) 2002-2008 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.2 (TS1M0) 
+      Licensed to UNIVERSITY OF NORTH CAROLINA CHAPEL HILL - T&R, Site 0070084073.
+NOTE: This session is executing on the Linux 2.6.18-194.el5 platform.
+
+
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+NOTE: SAS initialization used:
+      real time           0.24 seconds
+      cpu time            0.02 seconds
+      
+1          /* *************************************************************************/
+2          /* CREATED BY:      Jesse Blocher (UNC-Chapel Hill)
+3          /* MODIFIED BY:
+4          /* DATE CREATED:    Aug 2010
+5          /* PROG NAME:       eq_name_match.sas
+6          /* Project:         Market Interconnectedness and Fires Sales, Momentum
+7          /* This File:       Match the names with no cusips to names in CRSP
+8          /************************************************************************************/
+9          
+10         %include 'marketnet_header.sas'; *header file with basic options and libraries;
+NOTE: Libref MORN was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/morningstar
+NOTE: Libref MS_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/ms_work
+NOTE: Libref MKTNET was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet
+NOTE: Libref MKN_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet_work
+NOTE: Libref THOMSON was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/thomson
+23         
+24         
+25         /* Datasets required to run:
+26          * mktnet.equities_raw				: Equities with no cusips; security cusip port_date fundid year
+27          * mkn_work.cumulative&n			: where n = 1 to 317, which is the number of port_dates to
+27       ! iterate
+28          */
+29         
+30         /* Datasets Produced:
+31          * mktnet.equities_matched			: name match data combined and appended to main dataset
+32          * mktnet.equities_unmatched		: same data, still not yet matched to an NCUSIP
+33          */
+34         /*
+35         %macro combine_matched_data(ds=,start=,finish=);
+36         
+37         data &ds;
+38         	set mkn_work.cumulative1;
+39         run;
+40         
+41         %do a=2=&start % to &finish ;
+42         	proc append base = &ds data = mkn_work.cumulative&a ; run;
+43         %end;
+44         
+45         %mend combine_matched_data;
+46         
+47         *%combine_matched_data(ds=mkn_work.combined_matched_data,start=2,finish=317);
+48         * NOTE: The data set MKN_WORK.COMBINED_MATCHED_DATA has 612365 observations and 14
+48       ! variables;
+49         */
+50         
+51         /*
+52         *keep it simple, just what we need;
+53         data mkn_work.equities_raw_mktval;
+54         	set mkn_work.equities_no_cusip (keep = security cusip port_date fundid marketvalue);
+55         	year = year(port_date);
+56         run;
+57         
+58         *check uniqueness;
+59         proc sort data = mkn_work.equities_raw_mktval out = tester nodup;
+60         by security port_date fundid marketvalue;
+61         run;
+62         
+63         ** This is fine. Duplicates just mean identical security descriptions - no big deal -
+63       ! they SHOULD match;
+64         * instead, I just need to get back to the original dataset. The bigger problem is that I
+64       ! no longer have;
+65         * a unique id on my main data. Thats a problem;
+66         
+67         * Went back to original data and created a rowid, just an indexed integer. This is
+67       ! unique, so I can use
+68         * it to de-duplicate;
+69         */
+70         
+71         *NOTE: The data set MKN_WORK.EQUITIES_NO_CUSIP has 1129810 observations and 48 variables;
+72         *NOTE: The data set MKN_WORK.COMBINED_MATCHED_DATA has 612365 observations and 14
+72       ! variables;
+73         
+74         proc sort data = MKN_WORK.COMBINED_MATCHED_DATA out = tester nodup;
+75         by port_date fundid security;
+76         run;
+
+NOTE: There were 612365 observations read from the data set MKN_WORK.COMBINED_MATCHED_DATA.
+NOTE: 148 duplicate observations were deleted.
+NOTE: The data set WORK.TESTER has 612217 observations and 14 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           39.22 seconds
+      cpu time            2.42 seconds
+      
+
+77         proc sort data = MKN_WORK.EQUITIES_NO_CUSIP out = tester nodup;
+78         by port_date fundid security;
+79         run;
+
+NOTE: There were 1129810 observations read from the data set MKN_WORK.EQUITIES_NO_CUSIP.
+NOTE: 0 duplicate observations were deleted.
+NOTE: The data set WORK.TESTER has 1129810 observations and 49 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           45.36 seconds
+      cpu time            2.71 seconds
+      
+
+80         
+81         
+82         * now, combine the name matched data with the original data;
+83         proc sql;
+84         	create table mkn_work.equities_raw_matched as
+85         	select a.*, b.comnam, b.totalscore, b.ncusip from
+86         	mkn_work.equities_no_cusip as a
+87         	left join
+88         	mkn_work.combined_matched_data as b
+89         	on a.port_date = b.port_date and a.fundid = b.fundid and a.security = b.security
+90         	order by port_date, fundid;
+NOTE: Table MKN_WORK.EQUITIES_RAW_MATCHED created, with 1130218 rows and 52 columns.
+
+91         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           2:05.08
+      cpu time            7.44 seconds
+      
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3:30.05
+      cpu time            12.59 seconds
+      

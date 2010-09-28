@@ -1,0 +1,586 @@
+1                                                          The SAS System                           10:56 Monday, September 13, 2010
+
+NOTE: Copyright (c) 2002-2008 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.2 (TS1M0) 
+      Licensed to UNIVERSITY OF NORTH CAROLINA CHAPEL HILL - T&R, Site 0070084073.
+NOTE: This session is executing on the Linux 2.6.18-194.el5 platform.
+
+
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+NOTE: SAS initialization used:
+      real time           0.12 seconds
+      cpu time            0.03 seconds
+      
+1          /* *************************************************************************/
+2          /* CREATED BY:      Jesse Blocher (UNC-Chapel Hill)
+3          /* MODIFIED BY:
+4          /* DATE CREATED:    Aug 2010
+5          /* PROG NAME:       equities.sas
+6          /* Project:         Market Interconnectedness and Fires Sales, Momentum
+7          /* This File:       Analyze the equity holdings we have - CUSIPs? Compare to Thomson s12.
+8          /************************************************************************************/
+9          
+10         %include 'marketnet_header.sas'; *header file with basic options and libraries;
+NOTE: Libref MORN was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/morningstar
+NOTE: Libref MS_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/ms_work
+NOTE: Libref MKTNET was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet
+NOTE: Libref MKN_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet_work
+NOTE: Libref THOMSON was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/thomson
+23         
+24         
+25         /* Datasets required to run:
+26          * mktnet.mastmornhold_equities				: Master Dataset with all nonzero equity holdings
+27          */
+28         
+29         /* Datasets Produced:
+30          *
+31          */
+32         
+33         /*
+34         * OK, so first extract only the equity holdings; */
+35         
+36         data mkn_work.equities_only_w_cusip mkn_work.equities_no_cusip;
+37         	set mktnet.mastmornhold_equities;
+38         	where substr(type_cd,1,1) = 'E'; *starts with E;
+39         	if missing(cusip) then output mkn_work.equities_no_cusip;
+40         	else output mkn_work.equities_only_w_cusip;
+41         run;
+
+NOTE: There were 54473691 observations read from the data set MKTNET.MASTMORNHOLD_EQUITIES.
+      WHERE SUBSTR(type_cd, 1, 1)='E';
+NOTE: The data set MKN_WORK.EQUITIES_ONLY_W_CUSIP has 53349364 observations and 32 variables.
+NOTE: The data set MKN_WORK.EQUITIES_NO_CUSIP has 1124327 observations and 32 variables.
+NOTE: DATA statement used (Total process time):
+      real time           19:10.23
+      cpu time            1:29.56
+      
+
+42         
+43         /*
+44         NOTE: There were 54692087 observations read from the data set MORN.MASTER_MORN_HOLDINGS.
+45               WHERE SUBSTR(type_cd, 1, 1)='E';
+46         NOTE: The data set MKN_WORK.EQUITIES_ONLY_W_CUSIP has 53562277 observations and 49
+46       ! variables.
+47         NOTE: The data set MKN_WORK.EQUITIES_NO_CUSIP has 1129810 observations and 49 variables.
+48         NOTE: DATA statement used (Total process time):
+49               real time           53:35.59
+50               cpu time            1:26.68
+51         */
+52         
+53         proc freq data = mkn_work.equities_no_cusip;
+54         tables port_year type_cd ;
+55         run;
+
+NOTE: There were 1124327 observations read from the data set MKN_WORK.EQUITIES_NO_CUSIP.
+NOTE: The PROCEDURE FREQ printed page 1.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           15.36 seconds
+      cpu time            0.57 seconds
+      
+
+56         
+57         proc univariate data = mkn_work.equities_no_cusip;
+58         var marketvalue weight;
+59         run;
+
+NOTE: The PROCEDURE UNIVARIATE printed pages 2-3.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           17.61 seconds
+      cpu time            4.05 seconds
+      
+
+60         
+61         
+62         proc sql;
+63         	title 'Number of obs missing CUSIP and also description is 46';
+64         	select count(*) as count_desc from
+65         	mkn_work.equities_no_cusip
+66         	where missing(security);
+67         quit;
+NOTE: The PROCEDURE SQL printed page 4.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.46 seconds
+      cpu time            0.46 seconds
+      
+
+68         
+69         %include '/netscr/jabloche/util/cusip_validation.sas';
+167        * validate the cusips we do have;
+168        %validateCusips(ds_in=mkn_work.equities_only_w_cusip, cusip=cusip
+168      ! ,ds_out=mkn_work.validate_equity_cusip, valid=validCusip );
+SYMBOLGEN:  Macro variable DS_OUT resolves to mkn_work.validate_equity_cusip
+MPRINT(VALIDATECUSIPS):   data mkn_work.validate_equity_cusip (drop = CUSIP9 ninthDigit c1-c8 v1-v8 
+vsum1-vsum8 ind sumDigits checksum);
+SYMBOLGEN:  Macro variable DS_IN resolves to mkn_work.equities_only_w_cusip
+MPRINT(VALIDATECUSIPS):   set mkn_work.equities_only_w_cusip;
+SYMBOLGEN:  Macro variable CUSIP resolves to cusip
+MPRINT(VALIDATECUSIPS):   if ~missing(cusip) then do;
+SYMBOLGEN:  Macro variable CUSIP resolves to cusip
+MPRINT(VALIDATECUSIPS):   CUSIP9 = upcase(cusip);
+MPRINT(VALIDATECUSIPS):   length ninthDigit $ 1;
+SYMBOLGEN:  Macro variable CUSIP resolves to cusip
+MPRINT(VALIDATECUSIPS):   ninthDigit = substr(cusip , 9,1);
+MPRINT(VALIDATECUSIPS):   *check ninth digit;
+MPRINT(VALIDATECUSIPS):   if prxmatch('/[A-Z]/',ninthDigit ) or missing(ninthDigit) then do;
+SYMBOLGEN:  Macro variable VALID resolves to validCusip
+MPRINT(VALIDATECUSIPS):   validCusip = 0;
+MPRINT(VALIDATECUSIPS):   end;
+MPRINT(VALIDATECUSIPS):   else do;
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   length c1 $ 1;
+SYMBOLGEN:  Macro variable I resolves to 1
+SYMBOLGEN:  Macro variable CUSIP resolves to CUSIP9
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   c1 = substr(CUSIP9, 1, 1);
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   if prxmatch('/\d/',c1 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 1
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   v1 = c1 * 1;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   else if prxmatch('/[A-Z]/',c1 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   ind = index('ABCDEFGHIJKLMNOPQRSTUVWXYZ', c1 );
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   v1 = ind + 9;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\*/',c1 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   v1 = 36;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\@/',c1 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   v1 = 37;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\#/',c1 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   v1 = 38;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 1
+SYMBOLGEN:  Macro variable I resolves to 1
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   if mod(1 ,2) = 0 then v1 = v1 * 2;
+SYMBOLGEN:  Macro variable I resolves to 1
+SYMBOLGEN:  Macro variable I resolves to 1
+SYMBOLGEN:  Macro variable I resolves to 1
+MPRINT(ITERATEDIGIT):   vsum1 = floor(v1 /10) + mod(v1 , 10);
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   length c2 $ 1;
+SYMBOLGEN:  Macro variable I resolves to 2
+SYMBOLGEN:  Macro variable CUSIP resolves to CUSIP9
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   c2 = substr(CUSIP9, 2, 1);
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   if prxmatch('/\d/',c2 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 2
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   v2 = c2 * 1;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   else if prxmatch('/[A-Z]/',c2 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   ind = index('ABCDEFGHIJKLMNOPQRSTUVWXYZ', c2 );
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   v2 = ind + 9;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\*/',c2 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   v2 = 36;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\@/',c2 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   v2 = 37;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\#/',c2 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   v2 = 38;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 2
+SYMBOLGEN:  Macro variable I resolves to 2
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   if mod(2 ,2) = 0 then v2 = v2 * 2;
+SYMBOLGEN:  Macro variable I resolves to 2
+SYMBOLGEN:  Macro variable I resolves to 2
+SYMBOLGEN:  Macro variable I resolves to 2
+MPRINT(ITERATEDIGIT):   vsum2 = floor(v2 /10) + mod(v2 , 10);
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   length c3 $ 1;
+SYMBOLGEN:  Macro variable I resolves to 3
+SYMBOLGEN:  Macro variable CUSIP resolves to CUSIP9
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   c3 = substr(CUSIP9, 3, 1);
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   if prxmatch('/\d/',c3 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 3
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   v3 = c3 * 1;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   else if prxmatch('/[A-Z]/',c3 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   ind = index('ABCDEFGHIJKLMNOPQRSTUVWXYZ', c3 );
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   v3 = ind + 9;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\*/',c3 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   v3 = 36;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\@/',c3 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   v3 = 37;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\#/',c3 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   v3 = 38;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 3
+SYMBOLGEN:  Macro variable I resolves to 3
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   if mod(3 ,2) = 0 then v3 = v3 * 2;
+SYMBOLGEN:  Macro variable I resolves to 3
+SYMBOLGEN:  Macro variable I resolves to 3
+SYMBOLGEN:  Macro variable I resolves to 3
+MPRINT(ITERATEDIGIT):   vsum3 = floor(v3 /10) + mod(v3 , 10);
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   length c4 $ 1;
+SYMBOLGEN:  Macro variable I resolves to 4
+SYMBOLGEN:  Macro variable CUSIP resolves to CUSIP9
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   c4 = substr(CUSIP9, 4, 1);
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   if prxmatch('/\d/',c4 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 4
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   v4 = c4 * 1;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   else if prxmatch('/[A-Z]/',c4 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   ind = index('ABCDEFGHIJKLMNOPQRSTUVWXYZ', c4 );
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   v4 = ind + 9;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\*/',c4 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   v4 = 36;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\@/',c4 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   v4 = 37;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\#/',c4 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   v4 = 38;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 4
+SYMBOLGEN:  Macro variable I resolves to 4
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   if mod(4 ,2) = 0 then v4 = v4 * 2;
+SYMBOLGEN:  Macro variable I resolves to 4
+SYMBOLGEN:  Macro variable I resolves to 4
+SYMBOLGEN:  Macro variable I resolves to 4
+MPRINT(ITERATEDIGIT):   vsum4 = floor(v4 /10) + mod(v4 , 10);
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   length c5 $ 1;
+SYMBOLGEN:  Macro variable I resolves to 5
+SYMBOLGEN:  Macro variable CUSIP resolves to CUSIP9
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   c5 = substr(CUSIP9, 5, 1);
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   if prxmatch('/\d/',c5 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 5
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   v5 = c5 * 1;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   else if prxmatch('/[A-Z]/',c5 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   ind = index('ABCDEFGHIJKLMNOPQRSTUVWXYZ', c5 );
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   v5 = ind + 9;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\*/',c5 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   v5 = 36;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\@/',c5 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   v5 = 37;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\#/',c5 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   v5 = 38;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 5
+SYMBOLGEN:  Macro variable I resolves to 5
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   if mod(5 ,2) = 0 then v5 = v5 * 2;
+SYMBOLGEN:  Macro variable I resolves to 5
+SYMBOLGEN:  Macro variable I resolves to 5
+SYMBOLGEN:  Macro variable I resolves to 5
+MPRINT(ITERATEDIGIT):   vsum5 = floor(v5 /10) + mod(v5 , 10);
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   length c6 $ 1;
+SYMBOLGEN:  Macro variable I resolves to 6
+SYMBOLGEN:  Macro variable CUSIP resolves to CUSIP9
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   c6 = substr(CUSIP9, 6, 1);
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   if prxmatch('/\d/',c6 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 6
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   v6 = c6 * 1;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   else if prxmatch('/[A-Z]/',c6 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   ind = index('ABCDEFGHIJKLMNOPQRSTUVWXYZ', c6 );
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   v6 = ind + 9;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\*/',c6 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   v6 = 36;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\@/',c6 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   v6 = 37;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\#/',c6 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   v6 = 38;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 6
+SYMBOLGEN:  Macro variable I resolves to 6
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   if mod(6 ,2) = 0 then v6 = v6 * 2;
+SYMBOLGEN:  Macro variable I resolves to 6
+SYMBOLGEN:  Macro variable I resolves to 6
+SYMBOLGEN:  Macro variable I resolves to 6
+MPRINT(ITERATEDIGIT):   vsum6 = floor(v6 /10) + mod(v6 , 10);
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   length c7 $ 1;
+SYMBOLGEN:  Macro variable I resolves to 7
+SYMBOLGEN:  Macro variable CUSIP resolves to CUSIP9
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   c7 = substr(CUSIP9, 7, 1);
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   if prxmatch('/\d/',c7 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 7
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   v7 = c7 * 1;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   else if prxmatch('/[A-Z]/',c7 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   ind = index('ABCDEFGHIJKLMNOPQRSTUVWXYZ', c7 );
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   v7 = ind + 9;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\*/',c7 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   v7 = 36;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\@/',c7 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   v7 = 37;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\#/',c7 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   v7 = 38;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 7
+SYMBOLGEN:  Macro variable I resolves to 7
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   if mod(7 ,2) = 0 then v7 = v7 * 2;
+SYMBOLGEN:  Macro variable I resolves to 7
+SYMBOLGEN:  Macro variable I resolves to 7
+SYMBOLGEN:  Macro variable I resolves to 7
+MPRINT(ITERATEDIGIT):   vsum7 = floor(v7 /10) + mod(v7 , 10);
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   length c8 $ 1;
+SYMBOLGEN:  Macro variable I resolves to 8
+SYMBOLGEN:  Macro variable CUSIP resolves to CUSIP9
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   c8 = substr(CUSIP9, 8, 1);
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   if prxmatch('/\d/',c8 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 8
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   v8 = c8 * 1;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   else if prxmatch('/[A-Z]/',c8 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   ind = index('ABCDEFGHIJKLMNOPQRSTUVWXYZ', c8 );
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   v8 = ind + 9;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\*/',c8 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   v8 = 36;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\@/',c8 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   v8 = 37;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   else if prxmatch('/\#/',c8 ) then do;
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   v8 = 38;
+MPRINT(ITERATEDIGIT):   end;
+SYMBOLGEN:  Macro variable I resolves to 8
+SYMBOLGEN:  Macro variable I resolves to 8
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   if mod(8 ,2) = 0 then v8 = v8 * 2;
+SYMBOLGEN:  Macro variable I resolves to 8
+SYMBOLGEN:  Macro variable I resolves to 8
+SYMBOLGEN:  Macro variable I resolves to 8
+MPRINT(ITERATEDIGIT):   vsum8 = floor(v8 /10) + mod(v8 , 10);
+MPRINT(VALIDATECUSIPS):  ;
+MPRINT(VALIDATECUSIPS):   sumDigits = sum(of vsum1-vsum8);
+MPRINT(VALIDATECUSIPS):   checksum = mod( (10 - mod(sumDigits,10) ) , 10);
+SYMBOLGEN:  Macro variable VALID resolves to validCusip
+MPRINT(VALIDATECUSIPS):   if checksum = ninthDigit then validCusip = 1;
+SYMBOLGEN:  Macro variable VALID resolves to validCusip
+MPRINT(VALIDATECUSIPS):   else validCusip = 0;
+MPRINT(VALIDATECUSIPS):   end;
+MPRINT(VALIDATECUSIPS):   end;
+MPRINT(VALIDATECUSIPS):   else do;
+SYMBOLGEN:  Macro variable VALID resolves to validCusip
+MPRINT(VALIDATECUSIPS):   validCusip = .;
+MPRINT(VALIDATECUSIPS):   end;
+MPRINT(VALIDATECUSIPS):   run;
+
+NOTE: Character values have been converted to numeric values at the places given by: 
+      (Line):(Column).
+      168:246   168:2     168:2     168:2     168:2     168:2     168:2     168:2     168:2
+NOTE: Missing values were generated as a result of performing an operation on missing values.
+      Each place is given by: (Number of times) at (Line):(Column).
+      1 at 168:203   1 at 168:219   1 at 168:229   1 at 168:234   1 at 168:236   1 at 168:203
+      1 at 168:219   1 at 168:229   1 at 168:234   1 at 168:236   
+NOTE: There were 53349364 observations read from the data set MKN_WORK.EQUITIES_ONLY_W_CUSIP.
+NOTE: The data set MKN_WORK.VALIDATE_EQUITY_CUSIP has 53349364 observations and 33 variables.
+NOTE: DATA statement used (Total process time):
+      real time           22:49.46
+      cpu time            10:53.83
+      
+
+169        
+170        
+171        proc univariate data = mkn_work.validate_equity_cusip;
+172        var validCusip;
+173        run;
+
+NOTE: The PROCEDURE UNIVARIATE printed page 5.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           10:40.37
+      cpu time            33.28 seconds
+      
+
+174        /*
+175         = 356 invalid Cusips
+176                          N                    53562277    Sum Weights           53562277
+177                          Mean               0.99999335    Sum Observations      53561921
+178         */
+179        
+180        * Now, combine invalid cusips with no cusip data for name matching;
+181        data mkn_work.equities_valid_cusip (drop = validCusip) invalid_cusip (drop = validCusip);
+182        	set mkn_work.validate_equity_cusip;
+183        	if validCusip = 1 then output mkn_work.equities_valid_cusip;
+184        	else output invalid_cusip;
+185        run;
+
+NOTE: There were 53349364 observations read from the data set MKN_WORK.VALIDATE_EQUITY_CUSIP.
+NOTE: The data set MKN_WORK.EQUITIES_VALID_CUSIP has 53349016 observations and 32 variables.
+NOTE: The data set WORK.INVALID_CUSIP has 348 observations and 32 variables.
+NOTE: DATA statement used (Total process time):
+      real time           24:47.10
+      cpu time            55.36 seconds
+      
+
+186        
+187        proc append base = mkn_work.equities_no_cusip data = invalid_cusip;
+188        run;
+
+NOTE: Appending WORK.INVALID_CUSIP to MKN_WORK.EQUITIES_NO_CUSIP.
+NOTE: There were 348 observations read from the data set WORK.INVALID_CUSIP.
+NOTE: 348 observations added.
+NOTE: The data set MKN_WORK.EQUITIES_NO_CUSIP has 1124675 observations and 32 variables.
+NOTE: PROCEDURE APPEND used (Total process time):
+      real time           0.40 seconds
+      cpu time            0.00 seconds
+      
+
+189        
+190        *keep it simple, just what we need for name matching. Merge the rest back later;
+191        data mkn_work.equities_raw;
+192        	set mkn_work.equities_no_cusip (keep = security cusip port_date fundid rowid);
+193        	year = year(port_date);
+194        run;
+
+NOTE: There were 1124675 observations read from the data set MKN_WORK.EQUITIES_NO_CUSIP.
+NOTE: The data set MKN_WORK.EQUITIES_RAW has 1124675 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           2.07 seconds
+      cpu time            1.20 seconds
+      
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1:18:03.95
+      cpu time            13:58.35
+      

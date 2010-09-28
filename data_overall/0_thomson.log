@@ -1,0 +1,166 @@
+1                                                          The SAS System                            14:20 Thursday, August 26, 2010
+
+NOTE: Copyright (c) 2002-2008 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.2 (TS1M0) 
+      Licensed to UNIVERSITY OF NORTH CAROLINA CHAPEL HILL - T&R, Site 0070084073.
+NOTE: This session is executing on the Linux 2.6.18-194.el5 platform.
+
+
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+NOTE: SAS initialization used:
+      real time           0.11 seconds
+      cpu time            0.03 seconds
+      
+1          /* *************************************************************************/
+2          /* CREATED BY:      Jesse Blocher (UNC-Chapel Hill)
+3          /* MODIFIED BY:
+4          /* DATE CREATED:    Aug 2010
+5          /* PROG NAME:       thomson.sas
+6          /* Project:         Market Interconnectedness and Fires Sales, Momentum
+7          /* This File:       Analyze the equity holdings we have - CUSIPs? Compare to Thomson s12.
+8          /************************************************************************************/
+9          
+10         %include 'marketnet_header.sas'; *header file with basic options and libraries;
+NOTE: Libref MORN was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/morningstar
+NOTE: Libref MS_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/ms_work
+NOTE: Libref MKTNET was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet
+NOTE: Libref MKN_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet_work
+NOTE: Libref THOMSON was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/thomson
+23         
+24         /* Datasets required to run:
+25          * thomson.s12								: Data from WRDS
+26          * morn.portfolio_statistics_only			: Fund level stats, unique by fundid, portfolio date
+27          */
+28         
+29         /* Datasets Produced:
+30          *
+31          */
+32         
+33         proc contents data = thomson.s12; run;
+NOTE: Data file THOMSON.S12.DATA is in a format that is native to another host, or the file 
+      encoding does not match the session encoding. Cross Environment Data Access will be used, 
+      which might require additional CPU resources and might reduce performance.
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.18 seconds
+      cpu time            0.04 seconds
+      
+NOTE: The PROCEDURE CONTENTS printed page 1.
+
+34         
+35         proc sql;
+36         	/*
+37         	** OK, this gets all share classes. Yuk;
+38         	**Cusip does not help - it is at the holdings level;
+39         	create table thom_funds as
+40         	select month(fdate) as month, year(fdate) as year, count(unique fundno) as count_fundno,
+40       !  count(unique cusip) as count_cusip
+41         	from thomson.s12
+42         	group by fdate;
+43         	*/
+44         	
+45         	create table thom_funds2 as
+46         	select distinct fdate, fundno, assets
+47         	from thomson.s12
+48         	order by fdate;
+NOTE: Data file THOMSON.S12.DATA is in a format that is native to another host, or the file 
+      encoding does not match the session encoding. Cross Environment Data Access will be used, 
+      which might require additional CPU resources and might reduce performance.
+NOTE: Table WORK.THOM_FUNDS2 created, with 938197 rows and 3 columns.
+
+49         	
+50         	create table morn_funds as
+51         	select month(port_date) as month, year(port_date) as year, count(unique fundid) as
+51       ! count_fundid
+52         	from morn.portfolio_statistics_only
+53         	group by port_date;
+NOTE: Table WORK.MORN_FUNDS created, with 317 rows and 3 columns.
+
+54         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           5:48.95
+      cpu time            1:39.43
+      
+
+55         	
+56         proc sort data = thom_funds2 out = tester noduprec;
+57         by fdate fundno assets;
+58         run;
+
+NOTE: Input data set is already sorted; it has been copied to the output data set.
+NOTE: There were 938197 observations read from the data set WORK.THOM_FUNDS2.
+NOTE: The data set WORK.TESTER has 938197 observations and 3 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.94 seconds
+      cpu time            0.14 seconds
+      
+
+59         	
+60         proc sql;
+60       !          	
+61         	create table thom_funds3 as
+62         	select month(fdate) as month, year(fdate) as year, count(*) as count_fundno
+63         	from thom_funds2
+64         	group by fdate;
+NOTE: Table WORK.THOM_FUNDS3 created, with 119 rows and 3 columns.
+
+65         	
+66         	create table fund_compare as
+67         	select a.month,a.year, a.count_fundno, b.count_fundid
+68         	from thom_funds3 as a, morn_funds as b
+69         	where a.month = b.month and a.year = b.year
+70         	order by a.year, a.month;
+NOTE: Table WORK.FUND_COMPARE created, with 106 rows and 4 columns.
+
+71         	
+72         	
+73         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.98 seconds
+      cpu time            0.94 seconds
+      
+
+74         
+75         proc print data = fund_compare; run;
+
+NOTE: There were 106 observations read from the data set WORK.FUND_COMPARE.
+NOTE: The PROCEDURE PRINT printed page 2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           5:51.38
+      cpu time            1:40.61
+      

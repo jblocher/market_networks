@@ -1,0 +1,496 @@
+                                           Weight Problem      10:51 Thursday, September 9, 2010   1
+
+                                      The UNIVARIATE Procedure
+                                      Variable:  mkt_val_diff
+
+                                              Moments
+
+                  N                        1966    Sum Weights               1966
+                  Mean               -4.42854E9    Sum Observations    -8.7065E12
+                  Std Deviation      1.45481E11    Variance            2.11647E22
+                  Skewness           -43.371493    Kurtosis            1904.28498
+                  Uncorrected SS     4.16273E25    Corrected SS        4.15887E25
+                  Coeff Variation    -3285.0777    Std Error Mean      3281063781
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean     -4.429E9     Std Deviation         1.45481E11
+                       Median   -1.002E8     Variance              2.11647E22
+                       Mode     -3.343E8     Range                 6.40019E12
+                                             Interquartile Range    515573790
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t  -1.34973    Pr > |t|    0.1773
+                          Sign           M      -983    Pr >= |M|   <.0001
+                          Signed Rank    S   -966781    Pr >= |S|   <.0001
+
+
+                                      Quantiles (Definition 5)
+ 
+                                     Quantile          Estimate
+
+                                     100% Max             -6567
+                                     99%                -501207
+                                     95%               -2735126
+                                     90%               -6107024
+                                     75% Q3           -25033794
+                                     50% Median      -100165107
+                                     25% Q1          -540607584
+                                     10%            -2179588858
+                                     5%             -4042952198
+                                     1%            -12421652585
+                                     0% Min        -6.400192E12
+
+
+                                        Extreme Observations
+ 
+                            --------Lowest-------        ----Highest----
+ 
+                                   Value      Obs         Value      Obs
+
+                            -6.40019E+12     1940        -50119      128
+                            -8.10101E+11     1083        -31342     1855
+                            -2.00762E+10      996        -21406      793
+                            -1.76985E+10     1491        -10178      875
+                            -1.72448E+10     1683         -6567     1718
+                                           Weight Problem      10:51 Thursday, September 9, 2010   2
+
+                                      The UNIVARIATE Procedure
+                                       Variable:  weight_diff
+
+                                              Moments
+
+                  N                        1966    Sum Weights               1966
+                  Mean               73490.0499    Sum Observations     144481438
+                  Std Deviation      1242071.98    Variance            1.54274E12
+                  Skewness           17.6509623    Kurtosis            312.480654
+                  Uncorrected SS     3.04211E15    Corrected SS        3.03149E15
+                  Coeff Variation    1690.12266    Std Error Mean      28012.7025
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean        73490     Std Deviation            1242072
+                       Median        210     Variance              1.54274E12
+                       Mode     22314667     Range                   22314567
+                                             Interquartile Range    400.18979
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t  2.623454    Pr > |t|    0.0088
+                          Sign           M       983    Pr >= |M|   <.0001
+                          Signed Rank    S  966780.5    Pr >= |S|   <.0001
+
+
+                                      Quantiles (Definition 5)
+ 
+                                     Quantile          Estimate
+
+                                     100% Max       2.23147E+07
+                                     99%            1.83336E+04
+                                     95%            2.46218E+03
+                                     90%            1.52600E+03
+                                     75% Q3         5.42454E+02
+                                     50% Median     2.10362E+02
+                                     25% Q1         1.42264E+02
+                                     10%            1.12313E+02
+                                     5%             1.05242E+02
+                                     1%             1.00866E+02
+                                     0% Min         1.00008E+02
+
+
+                                        Extreme Observations
+ 
+                            ------Lowest-----        ------Highest-----
+ 
+                               Value      Obs            Value      Obs
+
+                             1.0E+02     1766         22314667     1660
+                             1.0E+02      151         22314667     1681
+                             1.0E+02      932         22314667     1726
+                             1.0E+02      389         22314667     1776
+                             1.0E+02      131         22314667     1813
+                                           Weight Problem      10:51 Thursday, September 9, 2010   3
+
+                                      The UNIVARIATE Procedure
+                                      Variable:  num_hold_diff
+
+                                              Moments
+
+                  N                        1966    Sum Weights               1966
+                  Mean               120.899797    Sum Observations        237689
+                  Std Deviation      171.542016    Variance            29426.6632
+                  Skewness            3.1077072    Kurtosis            16.0708998
+                  Uncorrected SS       86559945    Corrected SS        57823393.3
+                  Coeff Variation    141.887762    Std Error Mean      3.86882204
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean     120.8998     Std Deviation          171.54202
+                       Median    55.0000     Variance                   29427
+                       Mode       1.0000     Range                       1905
+                                             Interquartile Range    147.00000
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t  31.24977    Pr > |t|    <.0001
+                          Sign           M       983    Pr >= |M|   <.0001
+                          Signed Rank    S  966780.5    Pr >= |S|   <.0001
+
+
+                                      Quantiles (Definition 5)
+ 
+                                       Quantile      Estimate
+
+                                       100% Max         191E1
+                                       99%              788E0
+                                       95%              472E0
+                                       90%              326E0
+                                       75% Q3           162E0
+                                       50% Median        55E0
+                                       25% Q1            15E0
+                                       10%                3E0
+                                       5%                 1E0
+                                       1%                 1E0
+                                       0% Min             1E0
+
+
+                                        Extreme Observations
+ 
+                                ----Lowest----        ----Highest---
+ 
+                                Value      Obs        Value      Obs
+
+                                    1     1960         1140     1336
+                                    1     1813         1182     1470
+                                    1     1811         1220     1305
+                                    1     1807         1746     1875
+                                    1     1776         1906     1904
+                                           Weight Problem      10:51 Thursday, September 9, 2010   4
+
+                                      The UNIVARIATE Procedure
+                                      Variable:  pct_net_diff
+
+                                              Moments
+
+                  N                        1966    Sum Weights               1966
+                  Mean               0.24517982    Sum Observations     482.02352
+                  Std Deviation      5.69061623    Variance            32.3831131
+                  Skewness           29.2993106    Kurtosis             963.69328
+                  Uncorrected SS     63750.9997    Corrected SS        63632.8172
+                  Coeff Variation    2320.99701    Std Error Mean      0.12834163
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean     0.245180     Std Deviation            5.69062
+                       Median   0.000000     Variance                32.38311
+                       Mode     0.000000     Range                  236.42738
+                                             Interquartile Range   2.8422E-14
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t  1.910369    Pr > |t|    0.0562
+                          Sign           M       -11    Pr >= |M|   0.5420
+                          Signed Rank    S       866    Pr >= |S|   0.9411
+
+
+                                      Quantiles (Definition 5)
+ 
+                                      Quantile        Estimate
+
+                                      100% Max       2.040E+02
+                                      99%            8.518E-02
+                                      95%            1.000E-05
+                                      90%            1.000E-05
+                                      75% Q3         1.421E-14
+                                      50% Median     0.000E+00
+                                      25% Q1        -1.421E-14
+                                      10%           -1.000E-05
+                                      5%            -1.000E-05
+                                      1%            -2.000E-05
+                                      0% Min        -3.242E+01
+
+
+                                        Extreme Observations
+ 
+                            ------Lowest------        ------Highest-----
+ 
+                                Value      Obs            Value      Obs
+
+                            -3.24E+01      166          28.9217      175
+                            -1.31E+00      241          33.6009       71
+                            -8.22E-01      811          37.4007      104
+                            -6.34E-01      145         126.7651      124
+                            -1.12E-01       75         204.0091      135
+                                         No Weight Problem     10:51 Thursday, September 9, 2010   5
+
+                                      The UNIVARIATE Procedure
+                                      Variable:  mkt_val_diff
+
+                                              Moments
+
+                  N                      385267    Sum Weights             385267
+                  Mean               -3038676.4    Sum Observations    -1.1707E12
+                  Std Deviation      57352581.3    Variance            3.28932E15
+                  Skewness           -80.968591    Kurtosis            9686.69532
+                  Uncorrected SS     1.27082E21    Corrected SS        1.26726E21
+                  Coeff Variation    -1887.4198    Std Error Mean      92400.0196
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean     -3038676     Std Deviation           57352581
+                       Median          0     Variance              3.28932E15
+                       Mode            0     Range                 9806776252
+                                             Interquartile Range            0
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t  -32.8861    Pr > |t|    <.0001
+                          Sign           M    -22152    Pr >= |M|   <.0001
+                          Signed Rank    S  -4.924E8    Pr >= |S|   <.0001
+
+
+                                     Quantiles (Definition 5)
+ 
+                                     Quantile         Estimate
+
+                                     100% Max         14764134
+                                     99%                     0
+                                     95%                     0
+                                     90%                     0
+                                     75% Q3                  0
+                                     50% Median              0
+                                     25% Q1                  0
+                                     10%                 -8625
+                                     5%               -1325158
+                                     1%              -53458938
+                                     0% Min        -9792012118
+
+
+                                        Extreme Observations
+ 
+                           -------Lowest-------        ------Highest-----
+ 
+                                 Value      Obs            Value      Obs
+
+                           -9792012118   292355          2355726   183381
+                           -9525558085   284201          4668373   175296
+                           -7839102065   275283          4790189   193283
+                           -7383639352   306750          7404978   185721
+                           -7255683563   100313         14764134   114530
+                                         No Weight Problem     10:51 Thursday, September 9, 2010   6
+
+                                      The UNIVARIATE Procedure
+                                       Variable:  weight_diff
+
+                                              Moments
+
+                  N                      385267    Sum Weights             385267
+                  Mean               0.80715123    Sum Observations    310968.732
+                  Std Deviation      5.62404433    Variance            31.6298746
+                  Skewness           10.4520822    Kurtosis            127.249854
+                  Uncorrected SS     12436914.1    Corrected SS        12185915.3
+                  Coeff Variation    696.777026    Std Error Mean      0.00906083
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean     0.807151     Std Deviation            5.62404
+                       Median   0.000000     Variance                31.62987
+                       Mode     0.000000     Range                  117.52540
+                                             Interquartile Range    0.0000400
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t  89.08141    Pr > |t|    <.0001
+                          Sign           M   21493.5    Pr >= |M|   <.0001
+                          Signed Rank    S  7.3783E9    Pr >= |S|   <.0001
+
+
+                                      Quantiles (Definition 5)
+ 
+                                      Quantile       Estimate
+
+                                      100% Max       99.86041
+                                      99%            25.27262
+                                      95%             1.41171
+                                      90%             0.01646
+                                      75% Q3          0.00003
+                                      50% Median      0.00000
+                                      25% Q1         -0.00001
+                                      10%            -0.00003
+                                      5%             -0.00005
+                                      1%             -0.00010
+                                      0% Min        -17.66499
+
+
+                                        Extreme Observations
+ 
+                            ------Lowest------        -----Highest-----
+ 
+                                Value      Obs           Value      Obs
+
+                            -17.66499   338752         99.6560   237018
+                            -10.87814   336157         99.7998   334892
+                             -9.06161   341673         99.8051   317998
+                             -8.02619   345495         99.8465   307201
+                             -7.66204   343854         99.8604   367788
+                                         No Weight Problem     10:51 Thursday, September 9, 2010   7
+
+                                      The UNIVARIATE Procedure
+                                      Variable:  num_hold_diff
+
+                                              Moments
+
+                  N                      385267    Sum Weights             385267
+                  Mean               2.32101893    Sum Observations        894212
+                  Std Deviation      28.3456467    Variance             803.47569
+                  Skewness           239.948797    Kurtosis             88095.077
+                  Uncorrected SS      311627348    Corrected SS         309551865
+                  Coeff Variation    1221.25875    Std Error Mean      0.04566731
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean     2.321019     Std Deviation           28.34565
+                       Median   0.000000     Variance               803.47569
+                       Mode     0.000000     Range                      11633
+                                             Interquartile Range            0
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t  50.82451    Pr > |t|    <.0001
+                          Sign           M   39819.5    Pr >= |M|   <.0001
+                          Signed Rank    S  1.5873E9    Pr >= |S|   <.0001
+
+
+                                      Quantiles (Definition 5)
+ 
+                                       Quantile      Estimate
+
+                                       100% Max         11600
+                                       99%                 48
+                                       95%                  8
+                                       90%                  2
+                                       75% Q3               0
+                                       50% Median           0
+                                       25% Q1               0
+                                       10%                  0
+                                       5%                   0
+                                       1%                   0
+                                       0% Min             -33
+
+
+                                        Extreme Observations
+ 
+                               ----Lowest----        ----Highest----
+ 
+                               Value      Obs         Value      Obs
+
+                                 -33   352035          1331   382976
+                                 -13   352464          1715   138624
+                                 -10   355930          1962   379559
+                                 -10   352463          7827   117078
+                                  -6   353855         11600   383687
+                                         No Weight Problem     10:51 Thursday, September 9, 2010   8
+
+                                      The UNIVARIATE Procedure
+                                      Variable:  pct_net_diff
+
+                                              Moments
+
+                  N                      385267    Sum Weights             385267
+                  Mean               0.00265747    Sum Observations    1023.83549
+                  Std Deviation      0.78492366    Variance            0.61610515
+                  Skewness           322.929255    Kurtosis             130979.76
+                  Uncorrected SS     237367.087    Corrected SS        237364.366
+                  Coeff Variation    29536.5013    Std Error Mean      0.00126458
+
+
+                                     Basic Statistical Measures
+ 
+                           Location                    Variability
+
+                       Mean     0.002657     Std Deviation            0.78492
+                       Median   0.000000     Variance                 0.61611
+                       Mode     0.000000     Range                  397.11799
+                                             Interquartile Range            0
+
+
+                                     Tests for Location: Mu0=0
+ 
+                          Test           -Statistic-    -----p Value------
+
+                          Student's t    t  2.101464    Pr > |t|    0.0356
+                          Sign           M       349    Pr >= |M|   0.0116
+                          Signed Rank    S  25766606    Pr >= |S|   <.0001
+
+
+                                      Quantiles (Definition 5)
+ 
+                                      Quantile        Estimate
+
+                                      100% Max       312.49664
+                                      99%              0.00001
+                                      95%              0.00001
+                                      90%              0.00000
+                                      75% Q3           0.00000
+                                      50% Median       0.00000
+                                      25% Q1           0.00000
+                                      10%              0.00000
+                                      5%              -0.00001
+                                      1%              -0.00001
+                                      0% Min         -84.62135
+
+
+                                        Extreme Observations
+ 
+                            ------Lowest-----        ------Highest-----
+ 
+                               Value      Obs            Value      Obs
+
+                            -84.6214   167083          47.9370   128128
+                            -67.3261   152326          47.9637   123045
+                            -50.7594   170171          52.4182   138829
+                            -44.7282   170170         312.2500   134552
+                            -36.2947   319604         312.4966    70739

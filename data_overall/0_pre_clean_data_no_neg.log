@@ -1,0 +1,651 @@
+1                                                          The SAS System                          10:51 Thursday, September 9, 2010
+
+NOTE: Copyright (c) 2002-2008 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.2 (TS1M0) 
+      Licensed to UNIVERSITY OF NORTH CAROLINA CHAPEL HILL - T&R, Site 0070084073.
+NOTE: This session is executing on the Linux 2.6.18-194.el5 platform.
+
+
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+NOTE: SAS initialization used:
+      real time           0.24 seconds
+      cpu time            0.01 seconds
+      
+1          /* *************************************************************************/
+2          /* CREATED BY:      Jesse Blocher (UNC-Chapel Hill)
+3          /* MODIFIED BY:
+4          /* DATE CREATED:    Aug 2010
+5          /* PROG NAME:       equities.sas
+6          /* Project:         Market Interconnectedness and Fires Sales, Momentum
+7          /* This File:       Analyze the equity holdings we have - CUSIPs? Compare to Thomson s12.
+8          /************************************************************************************/
+9          
+10         %include 'marketnet_header.sas'; *header file with basic options and libraries;
+NOTE: Libref MORN was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/morningstar
+NOTE: Libref MS_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/ms_work
+NOTE: Libref MKTNET was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet
+NOTE: Libref MKN_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet_work
+NOTE: Libref THOMSON was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/thomson
+23         
+24         
+25         /* Datasets required to run:
+26          * morn.master_morn_holdings				: Master Dataset with all holdings and fund stats
+27          */
+28         
+29         /* Datasets Produced:
+30          * mktnet.clean_morn_holdings				: Removed columns not needed, bad portfolio weights
+31          */
+32         
+33         
+34         ** First, we drop some of the less necessary variables;
+35         
+36         /*
+37         data mkn_work.mornholdings_pared;
+38         	set morn.master_morn_holdings (drop = 	pct_long_bond pct_long_cash pct_long_convertible
+38       ! pct_long_other pct_long_preferred pct_long_stock
+39         											pct_net_bond pct_net_cash pct_net_convertible pct_net_other pct_net_preferred
+39       ! pct_net_stock
+40         											pct_sector_1-pct_sector_12 country industry_code sector_code sector_name
+40       ! stkid);
+41         run;
+42         */
+43         
+44         ** Next, lets work with equities only for now;
+45         /*
+46         data mkn_work.equity_funds;
+47         	set morn.master_morn_holdings (drop = 	pct_sector_1-pct_sector_12 country industry_code
+47       ! sector_code sector_name stkid);
+48         	where pct_long_stock > 0;
+49         run;
+50         
+51         proc contents data = mkn_work.mornholdings_pared; run;
+52         proc contents data = mkn_work.equity_funds; run;
+53         
+54         proc univariate data = mkn_work.equity_funds;
+55         var pct_long_stock pct_net_stock weight;
+56         run;
+57         
+58         */
+59         
+60         **** Now, lets get some stats on it ***;
+61         /* REALLY long
+62         proc sql;
+63         	create table morn_port_stats_sum as
+64         	select 	port_date, fundid,
+65         			sum(weight) as sum_port_weight,
+66         			sum(marketvalue) as sum_mkt_val,
+67         			count(type_cd) as num_holdings_calc
+68         	from mkn_work.equity_funds
+69         	group by port_date, fundid;
+70         quit;
+71         proc sort data = mkn_work.equity_funds out = funds_only nodupkey;
+72         by port_date fundid;
+73         run;
+74         proc sql;
+75         	create table ms_work.morn_port_stats as
+76         	select 	a.port_date, a.fundid, year(a.port_date) as port_year, b.sum_port_weight,
+77         			a.tot_investment, b.sum_mkt_val,
+78         			a.num_holdings, b.num_holdings_calc,
+79         			a.pct_long_bond, a.pct_long_cash, a.pct_long_convertible, a.pct_long_other,
+79       ! a.pct_long_preferred, a.pct_long_stock,
+80         			a.pct_net_bond, a.pct_net_cash, a.pct_net_convertible, a.pct_net_other,
+80       ! a.pct_net_preferred, a.pct_net_stock
+81         	from funds_only as a, morn_port_stats_sum as b
+82         	where a.port_date = b.port_date and a.fundid = b.fundid;
+83         quit;
+84         **/
+85         
+86         data test_morn_stats;
+87         	set ms_work.morn_port_stats;
+88         	** all of these should be zero;
+89         	mkt_val_diff = sum_mkt_val - tot_investment;
+90         	weight_diff = sum_port_weight - 100;
+91         	num_hold_diff = num_holdings_calc - num_holdings;
+92         	
+93         	pct_long_diff = pct_long_bond+ pct_long_cash+ pct_long_convertible+ pct_long_other+
+93       ! pct_long_preferred+ pct_long_stock - 100;
+94         	pct_net_diff = pct_net_bond+ pct_net_cash+ pct_net_convertible+ pct_net_other+
+94       ! pct_net_preferred+ pct_net_stock - 100;
+95         	
+96         	if -25 <= weight_diff <= 100 then weight_problem = 0;
+97         	else weight_problem = 1;
+98         run;
+
+NOTE: There were 387233 observations read from the data set MS_WORK.MORN_PORT_STATS.
+NOTE: The data set WORK.TEST_MORN_STATS has 387233 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           2.87 seconds
+      cpu time            0.21 seconds
+      
+
+99         
+100        **** now, subset to manually clean (ugh);
+101        
+102        data mkn_work.weight_problem mkn_work.no_weight_problem;
+103        	set test_morn_stats;
+104        	port_year = year(port_date);
+105        	if weight_problem = 0 then output mkn_work.no_weight_problem;
+106        	else output mkn_work.weight_problem; *note this will include missing weights;
+107        run;
+
+NOTE: There were 387233 observations read from the data set WORK.TEST_MORN_STATS.
+NOTE: The data set MKN_WORK.WEIGHT_PROBLEM has 1966 observations and 26 variables.
+NOTE: The data set MKN_WORK.NO_WEIGHT_PROBLEM has 385267 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           4.96 seconds
+      cpu time            0.27 seconds
+      
+
+108        
+109        title 'Weight Problem';
+110        proc univariate data = mkn_work.weight_problem;
+111        var mkt_val_diff weight_diff num_hold_diff pct_net_diff;
+112        run;
+
+NOTE: The PROCEDURE UNIVARIATE printed pages 1-4.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           0.15 seconds
+      cpu time            0.03 seconds
+      
+
+113        title 'No Weight Problem';
+114        proc univariate data = mkn_work.no_weight_problem;
+115        var mkt_val_diff weight_diff num_hold_diff pct_net_diff;
+116        run;
+
+NOTE: The PROCEDURE UNIVARIATE printed pages 5-8.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           2.14 seconds
+      cpu time            0.36 seconds
+      
+
+117        /* takes an hour to run - 2M rows. Ugh. */
+118        proc sql;
+119        	create table mktnet.weight_problem_equities as
+120        	select a.*, b.*
+121        	from mkn_work.weight_problem as a, mkn_work.equity_funds as b
+122        	where a.port_date = b.port_date and a.fundid = b.fundid
+123        	order by b.port_date, b.fundid;
+WARNING: Variable fundid already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable port_date already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable port_year already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable tot_investment already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable num_holdings already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_long_stock already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_long_bond already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_long_preferred already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_long_convertible already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_long_cash already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_long_other already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_net_stock already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_net_bond already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_net_preferred already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_net_convertible already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_net_cash already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+WARNING: Variable pct_net_other already exists on file MKTNET.WEIGHT_PROBLEM_EQUITIES.
+NOTE: Table MKTNET.WEIGHT_PROBLEM_EQUITIES created, with 883479 rows and 41 columns.
+
+124        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           7:24.93
+      cpu time            40.90 seconds
+      
+
+125        
+126        
+127        %macro subset_year();
+128        
+129        * 1983 - 2009;
+130        %do y=1983 %to 2009;
+131        data mktnet.weight_prob_eq&y ;
+132        	set mktnet.weight_problem_equities;
+133        	where port_year = &y ;
+134        run;
+135        %end;
+136        
+137        %mend;
+138        
+139        %subset_year();
+MPRINT(SUBSET_YEAR):   * 1983 -2009;
+SYMBOLGEN:  Macro variable Y resolves to 1983
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1983 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1983
+MPRINT(SUBSET_YEAR):   where port_year = 1983 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1983;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1983 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           10.16 seconds
+      cpu time            0.30 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1984
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1984 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1984
+MPRINT(SUBSET_YEAR):   where port_year = 1984 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1984;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1984 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.37 seconds
+      cpu time            0.21 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1985
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1985 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1985
+MPRINT(SUBSET_YEAR):   where port_year = 1985 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1985;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1985 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.33 seconds
+      cpu time            0.21 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1986
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1986 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1986
+MPRINT(SUBSET_YEAR):   where port_year = 1986 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1986;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1986 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.32 seconds
+      cpu time            0.22 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1987
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1987 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1987
+MPRINT(SUBSET_YEAR):   where port_year = 1987 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1987;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1987 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.34 seconds
+      cpu time            0.21 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1988
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1988 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1988
+MPRINT(SUBSET_YEAR):   where port_year = 1988 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1988;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1988 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.43 seconds
+      cpu time            0.23 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1989
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1989 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1989
+MPRINT(SUBSET_YEAR):   where port_year = 1989 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1989;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1989 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.40 seconds
+      cpu time            0.21 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1990
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1990 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1990
+MPRINT(SUBSET_YEAR):   where port_year = 1990 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1990;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1990 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.34 seconds
+      cpu time            0.22 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1991
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1991 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1991
+MPRINT(SUBSET_YEAR):   where port_year = 1991 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1991;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1991 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.32 seconds
+      cpu time            0.21 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1992
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1992 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1992
+MPRINT(SUBSET_YEAR):   where port_year = 1992 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1992;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1992 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.33 seconds
+      cpu time            0.23 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1993
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1993 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1993
+MPRINT(SUBSET_YEAR):   where port_year = 1993 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1993;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1993 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.31 seconds
+      cpu time            0.23 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1994
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1994 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1994
+MPRINT(SUBSET_YEAR):   where port_year = 1994 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1994;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1994 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.34 seconds
+      cpu time            0.25 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1995
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1995 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1995
+MPRINT(SUBSET_YEAR):   where port_year = 1995 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 0 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1995;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1995 has 0 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.35 seconds
+      cpu time            0.26 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1996
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1996 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1996
+MPRINT(SUBSET_YEAR):   where port_year = 1996 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 248 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1996;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1996 has 248 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.31 seconds
+      cpu time            0.24 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1997
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1997 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1997
+MPRINT(SUBSET_YEAR):   where port_year = 1997 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 1552 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1997;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1997 has 1552 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.41 seconds
+      cpu time            0.26 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1998
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1998 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1998
+MPRINT(SUBSET_YEAR):   where port_year = 1998 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 6875 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1998;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1998 has 6875 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.53 seconds
+      cpu time            0.25 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 1999
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq1999 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 1999
+MPRINT(SUBSET_YEAR):   where port_year = 1999 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 8673 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=1999;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ1999 has 8673 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.66 seconds
+      cpu time            0.27 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 2000
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq2000 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 2000
+MPRINT(SUBSET_YEAR):   where port_year = 2000 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 11913 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=2000;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ2000 has 11913 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.52 seconds
+      cpu time            0.23 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 2001
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq2001 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 2001
+MPRINT(SUBSET_YEAR):   where port_year = 2001 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 8979 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=2001;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ2001 has 8979 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.38 seconds
+      cpu time            0.22 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 2002
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq2002 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 2002
+MPRINT(SUBSET_YEAR):   where port_year = 2002 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 35769 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=2002;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ2002 has 35769 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.54 seconds
+      cpu time            0.29 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 2003
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq2003 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 2003
+MPRINT(SUBSET_YEAR):   where port_year = 2003 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 42843 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=2003;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ2003 has 42843 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.80 seconds
+      cpu time            0.28 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 2004
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq2004 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 2004
+MPRINT(SUBSET_YEAR):   where port_year = 2004 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 40757 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=2004;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ2004 has 40757 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.62 seconds
+      cpu time            0.26 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 2005
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq2005 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 2005
+MPRINT(SUBSET_YEAR):   where port_year = 2005 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 45647 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=2005;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ2005 has 45647 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.44 seconds
+      cpu time            0.26 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 2006
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq2006 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 2006
+MPRINT(SUBSET_YEAR):   where port_year = 2006 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 47113 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=2006;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ2006 has 47113 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.50 seconds
+      cpu time            0.24 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 2007
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq2007 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 2007
+MPRINT(SUBSET_YEAR):   where port_year = 2007 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 169621 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=2007;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ2007 has 169621 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           1.14 seconds
+      cpu time            0.32 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 2008
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq2008 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 2008
+MPRINT(SUBSET_YEAR):   where port_year = 2008 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 257185 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=2008;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ2008 has 257185 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           1.33 seconds
+      cpu time            0.42 seconds
+      
+
+SYMBOLGEN:  Macro variable Y resolves to 2009
+MPRINT(SUBSET_YEAR):   data mktnet.weight_prob_eq2009 ;
+MPRINT(SUBSET_YEAR):   set mktnet.weight_problem_equities;
+SYMBOLGEN:  Macro variable Y resolves to 2009
+MPRINT(SUBSET_YEAR):   where port_year = 2009 ;
+MPRINT(SUBSET_YEAR):   run;
+
+NOTE: There were 206304 observations read from the data set MKTNET.WEIGHT_PROBLEM_EQUITIES.
+      WHERE port_year=2009;
+NOTE: The data set MKTNET.WEIGHT_PROB_EQ2009 has 206304 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           1.10 seconds
+      cpu time            0.36 seconds
+      
+
+140        
+141        
+142        ** Instert manually cleaned data here ** ;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           7:59.43
+      cpu time            48.70 seconds
+      

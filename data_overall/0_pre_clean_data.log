@@ -1,0 +1,440 @@
+1                                                          The SAS System                          08:19 Tuesday, September 14, 2010
+
+NOTE: Unable to open SASUSER.REGSTRY. WORK.REGSTRY will be opened instead.
+NOTE: All registry changes will be lost at the end of the session.
+
+WARNING: Unable to copy SASUSER registry to WORK registry. Because of this, you will not see registry customizations during this 
+         session.
+NOTE: Copyright (c) 2002-2008 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.2 (TS1M0) 
+      Licensed to UNIVERSITY OF NORTH CAROLINA CHAPEL HILL - T&R, Site 0070084073.
+NOTE: This session is executing on the Linux 2.6.18-194.el5 platform.
+
+
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+NOTE: SAS initialization used:
+      real time           0.16 seconds
+      cpu time            0.03 seconds
+      
+1          /* *************************************************************************/
+2          /* CREATED BY:      Jesse Blocher (UNC-Chapel Hill)
+3          /* MODIFIED BY:
+4          /* DATE CREATED:    Aug 2010
+5          /* PROG NAME:       equities.sas
+6          /* Project:         Market Interconnectedness and Fires Sales, Momentum
+7          /* This File:       Analyze the equity holdings we have - CUSIPs? Compare to Thomson s12.
+8          /************************************************************************************/
+9          
+10         %include 'marketnet_header.sas'; *header file with basic options and libraries;
+NOTE: Libref MORN was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/morningstar
+NOTE: Libref MS_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/ms_work
+NOTE: Libref MKTNET was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet
+NOTE: Libref MKN_WORK was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/marketnet_work
+NOTE: Libref THOMSON was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: /largefs/jabloche/thomson
+23         
+24         
+25         /* Datasets required to run:
+26          * morn.master_morn_holdings				: Master Dataset with all holdings and fund stats
+27          */
+28         
+29         /* Datasets Produced:
+30          * mktnet.mastmornhold_equities				: Removed columns not needed, bad portfolio weights
+31          */
+32         
+33         
+34         ** First, we drop some of the less necessary variables;
+35         
+36         /*
+37         data mkn_work.mornholdings_pared;
+38         	set morn.master_morn_holdings (drop = 	pct_long_bond pct_long_cash pct_long_convertible
+38       ! pct_long_other pct_long_preferred pct_long_stock
+39         											pct_net_bond pct_net_cash pct_net_convertible pct_net_other pct_net_preferred
+39       ! pct_net_stock
+40         											pct_sector_1-pct_sector_12 country industry_code sector_code sector_name
+40       ! stkid);
+41         run;
+42         
+43         data mkn_work.mornholdings_pared;
+44         	set morn.master_morn_holdings (drop = 	pct_sector_1-pct_sector_12 country industry_code
+44       ! sector_code sector_name stkid);
+45         run;
+46         /*
+47         NOTE: There were 92561476 observations read from the data set MORN.MASTER_MORN_HOLDINGS.
+48         NOTE: The data set MKN_WORK.MORNHOLDINGS_PARED has 92561476 observations and 32
+48       ! variables.
+49         NOTE: DATA statement used (Total process time):
+50               real time           52:17.02
+51               cpu time            1:40.90
+52         */
+53         
+54         ** Next, lets work with equities only for now;
+55         
+56         ** Need to be careful with sample selection - cannot just select portfolios with equities
+56       ! ;
+57         ** Need to identify portfolios which have ever held equities and then choose a threshold
+57       ! whereby funds are excluded;
+58         /*
+59         proc sort data = mkn_work.mornholdings_pared out = mkn_work.fund_level_data nodupkey;
+60         by port_date fundid;
+61         run;
+62         NOTE: There were 92561476 observations read from the data set
+62       ! MKN_WORK.MORNHOLDINGS_PARED.
+63         NOTE: 92046362 observations with duplicate key values were deleted.
+64         NOTE: The data set MKN_WORK.FUND_LEVEL_DATA has 515114 observations and 32 variables.
+65         NOTE: PROCEDURE SORT used (Total process time):
+66               real time           16:47.59
+67               cpu time            1:27.35
+68         */
+69         
+70         /*
+71         data fund_level_data2;
+72         	set mkn_work.fund_level_data;
+73         	* this is intentional. If pct_net_stock is negative and long is 0, that means they are
+73       ! fully short, but we want to keep it;
+74         	if ( pct_long_stock = 0 and pct_net_stock = 0 ) then no_stock = 1;
+75         	else no_stock = 0;
+76         run;
+77         
+78         proc sql;
+79         	create table nostock_summary as
+80         	select fundid, sum(no_stock) as count_no_stock, count(*) as num_obs,
+81         			(calculated count_no_stock)/(calculated num_obs) as pct_no_stock
+82         	from fund_level_data2
+83         	group by fundid;
+84         quit;
+85         
+86         
+87         /* HISTOGRAM: Based on this U-shaped curve, cutoff of .8 looks good
+88         proc univariate data = nostock_summary;
+89         where 1 > pct_no-stock > 0;
+90         histogram pct_no_stock;
+91         run;
+92         */
+93         
+94         
+95         /*
+96         * Keep the set of fundids where they hold some stock 20% of the time;
+97         proc sql;
+98         	create table mkn_work.fund_level_equities_selection as
+99         	select fundid
+100        	from nostock_summary
+101        	where pct_no_stock < 0.8;
+102        quit;
+103        
+104        ** Here, we identify funds which have stock;
+105        
+106        proc sql;
+107        	create table mkn_work.equity_funds as
+108        	select a.*
+109        	from mkn_work.mornholdings_pared as a, mkn_work.fund_level_equities_selection as b
+110        	where a.fundid = b.fundid;
+111        quit;
+112        /*
+113        NOTE: Table MKN_WORK.EQUITY_FUNDS created, with 70835096 rows and 32 columns.
+114        
+115        107        quit;
+116        NOTE: PROCEDURE SQL used (Total process time):
+117              real time           35:44.96
+118              cpu time            1:25.90
+119        */
+120        
+121        
+122        /*
+123        *test should equal 8082 or same amount of records in
+123      ! mkn_work.fund_level_equities_selection;
+124        proc sort data = mkn_work.equity_funds out = tester nodupkey;
+125        by fundid;
+126        run;
+127        
+128        /*
+129        NOTE: There were 70835096 observations read from the data set MKN_WORK.EQUITY_FUNDS.
+130        NOTE: 70827014 observations with duplicate key values were deleted.
+131        NOTE: The data set WORK.TESTER has 8082 observations and 32 variables.
+132        NOTE: PROCEDURE SORT used (Total process time):
+133              real time           17:19.65
+134              cpu time            48.25 seconds
+135        */
+136        
+137        
+138        
+139        	/*
+140        	 * My investigation showed two things:
+141        	 * 1. Short positions were not listed as negative weights. Solved above.
+142        	 * 2. Short position and Long position weights are based on Long-only denominator
+143        	 * 3. This is not always a good assumption. In some portfolios, short = funding, others
+143      ! it is an investment
+144        	 * 4. There are a handful of data errors, fixed below
+145        	 */
+146        	
+147        /*
+148        data mkn_work.equity_funds_alt mkn_work.equity_funds_badweight;
+149        	set mkn_work.equity_funds;
+150        
+151        	* If marketvalue is negative, then by def it is a short position;
+152        	if marketvalue < 0 and weight > 0 then weight = -1 * weight;
+153        	
+154        	 * fix data errors;
+155        	 if missing(weight) then delete;
+156        	
+157        	 if (weight > 3000) or (weight < -3000) then output mkn_work.equity_funds_badweight;
+158        	 else output mkn_work.equity_funds_alt;
+159        	
+160        run;
+161        
+162        *Now, as a final check, lets see how our weight summary does;
+163        *it still gives some outliers, which we have to assume are data errors;
+164        *so, finally we truncate;
+165        
+166        **** Now, lets get some stats on it ***;
+167        **** REALLY long ******;
+168        proc sql;
+169        	create table morn_port_stats_sum as
+170        	select 	port_date, fundid,
+171        			sum(weight) as sum_port_weight,
+172        			sum(marketvalue) as sum_mkt_val,
+173        			count(type_cd) as num_holdings_calc
+174        	from mkn_work.equity_funds_alt
+175        	group by port_date, fundid;
+176        quit;
+177        proc sort data = mkn_work.equity_funds_alt out = funds_only nodupkey;
+178        by port_date fundid;
+179        run;
+180        proc sql;
+181        	create table ms_work.morn_port_stats as
+182        	select 	a.port_date, a.fundid, year(a.port_date) as port_year, b.sum_port_weight,
+183        			a.tot_investment, b.sum_mkt_val,
+184        			a.num_holdings, b.num_holdings_calc,
+185        			a.pct_long_bond, a.pct_long_cash, a.pct_long_convertible, a.pct_long_other,
+185      ! a.pct_long_preferred, a.pct_long_stock,
+186        			a.pct_net_bond, a.pct_net_cash, a.pct_net_convertible, a.pct_net_other,
+186      ! a.pct_net_preferred, a.pct_net_stock
+187        	from funds_only as a, morn_port_stats_sum as b
+188        	where a.port_date = b.port_date and a.fundid = b.fundid;
+189        quit;
+190        */
+191        ** End creating main stat db;
+192        
+193        * This is pretty fast - just compute som summary stats;
+194        data test_morn_stats;
+195        	set ms_work.morn_port_stats;
+196        	** all of these should be zero;
+197        	mkt_val_diff = sum_mkt_val - tot_investment;
+198        	weight_diff = sum_port_weight - 100;
+199        	num_hold_diff = num_holdings_calc - num_holdings;
+200        	
+201        	pct_long_diff = pct_long_bond+ pct_long_cash+ pct_long_convertible+ pct_long_other+
+201      ! pct_long_preferred+ pct_long_stock - 100;
+202        	pct_net_diff = pct_net_bond+ pct_net_cash+ pct_net_convertible+ pct_net_other+
+202      ! pct_net_preferred+ pct_net_stock - 100;
+203        	
+204        	if -25 <= weight_diff <= 25 then weight_problem = 0;
+205        	else weight_problem = 1;
+206        run;
+
+NOTE: There were 399984 observations read from the data set MS_WORK.MORN_PORT_STATS.
+NOTE: The data set WORK.TEST_MORN_STATS has 399984 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           4.03 seconds
+      cpu time            0.31 seconds
+      
+
+207        
+208        title 'Before Truncation';
+209        proc univariate data = test_morn_stats;
+210        var mkt_val_diff weight_diff num_hold_diff pct_net_diff weight_problem;
+211        run;
+
+NOTE: The PROCEDURE UNIVARIATE printed pages 1-5.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           3.05 seconds
+      cpu time            0.62 seconds
+      
+
+212        
+213        
+214        * This truncates at 1 and 99 based on weight difference from 100 - assume data errors;
+215        %include '/netscr/jabloche/util/winsorize_truncate.sas';
+418        %WT(data=test_morn_stats, out=mkn_work.trunc_final_fund_data, byvar=none,
+418      ! vars=weight_diff, type = T, pctl = 1 99, drop= Y);
+SYMBOLGEN:  Macro variable OUT resolves to mkn_work.trunc_final_fund_data
+SYMBOLGEN:  Macro variable VARS resolves to weight_diff
+SYMBOLGEN:  Macro variable XN resolves to 1
+SYMBOLGEN:  Macro variable VARLOW resolves to 
+SYMBOLGEN:  Macro variable TOKEN resolves to weight_diff
+SYMBOLGEN:  Macro variable VARHIGH resolves to 
+SYMBOLGEN:  Macro variable TOKEN resolves to weight_diff
+SYMBOLGEN:  Macro variable XN resolves to 1
+SYMBOLGEN:  Macro variable VARS resolves to weight_diff
+SYMBOLGEN:  Macro variable XN resolves to 2
+SYMBOLGEN:  Macro variable XN resolves to 2
+MPRINT(WT):   data xtemp;
+SYMBOLGEN:  Macro variable DATA resolves to test_morn_stats
+MPRINT(WT):   set test_morn_stats;
+SYMBOLGEN:  Macro variable BYVAR resolves to none
+
+NOTE: There were 399984 observations read from the data set WORK.TEST_MORN_STATS.
+NOTE: The data set WORK.XTEMP has 399984 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.82 seconds
+      cpu time            0.23 seconds
+      
+
+MPRINT(WT):   data xtemp;
+MPRINT(WT):   set xtemp;
+MPRINT(WT):   xbyvar = 1;
+
+NOTE: There were 399984 observations read from the data set WORK.XTEMP.
+NOTE: The data set WORK.XTEMP has 399984 observations and 27 variables.
+NOTE: DATA statement used (Total process time):
+      real time           3.21 seconds
+      cpu time            0.29 seconds
+      
+
+MPRINT(WT):   proc sort data = xtemp;
+SYMBOLGEN:  Macro variable BYVAR resolves to xbyvar
+MPRINT(WT):   by xbyvar;
+
+NOTE: There were 399984 observations read from the data set WORK.XTEMP.
+NOTE: The data set WORK.XTEMP has 399984 observations and 27 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           2.22 seconds
+      cpu time            0.50 seconds
+      
+
+MPRINT(WT):   proc univariate data = xtemp noprint;
+SYMBOLGEN:  Macro variable BYVAR resolves to xbyvar
+MPRINT(WT):   by xbyvar;
+SYMBOLGEN:  Macro variable VARS resolves to weight_diff
+MPRINT(WT):   var weight_diff;
+SYMBOLGEN:  Macro variable PCTL resolves to 1 99
+SYMBOLGEN:  Macro variable VARS resolves to weight_diff
+MPRINT(WT):   output out = xtemp_pctl PCTLPTS = 1 99 PCTLPRE = weight_diff PCTLNAME = Low High;
+SYMBOLGEN:  Macro variable OUT resolves to mkn_work.trunc_final_fund_data
+NOTE: The data set WORK.XTEMP_PCTL has 1 observations and 3 variables.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           1.10 seconds
+      cpu time            0.28 seconds
+      
+
+MPRINT(WT):   data mkn_work.trunc_final_fund_data;
+MPRINT(WT):   merge xtemp xtemp_pctl;
+SYMBOLGEN:  Macro variable BYVAR resolves to xbyvar
+MPRINT(WT):   by xbyvar;
+SYMBOLGEN:  Macro variable XN resolves to 1
+SYMBOLGEN:  Macro variable VARS resolves to weight_diff
+MPRINT(WT):   array trimvars{1} weight_diff;
+SYMBOLGEN:  Macro variable XN resolves to 1
+SYMBOLGEN:  Macro variable VARLOW resolves to weight_diffLow
+MPRINT(WT):   array trimvarl{1} weight_diffLow;
+SYMBOLGEN:  Macro variable XN resolves to 1
+SYMBOLGEN:  Macro variable VARHIGH resolves to weight_diffHigh
+MPRINT(WT):   array trimvarh{1} weight_diffHigh;
+MPRINT(WT):   do xi = 1 to dim(trimvars);
+SYMBOLGEN:  Macro variable TYPE resolves to T
+MPRINT(WT):   if trimvars{xi} ne . then do;
+MPRINT(WT):   if (trimvars{xi} < trimvarl{xi}) then trimvars{xi} = .T;
+MPRINT(WT):   if (trimvars{xi} > trimvarh{xi}) then trimvars{xi} = .T;
+MPRINT(WT):   end;
+SYMBOLGEN:  Macro variable DROP resolves to Y
+MPRINT(WT):   if trimvars{xi} = .T then delete;
+MPRINT(WT):   end;
+SYMBOLGEN:  Macro variable VARLOW resolves to weight_diffLow
+SYMBOLGEN:  Macro variable VARHIGH resolves to weight_diffHigh
+SYMBOLGEN:  Macro variable DROPVAR resolves to xbyvar
+MPRINT(WT):   drop weight_diffLow weight_diffHigh xbyvar xi;
+
+NOTE: There were 399984 observations read from the data set WORK.XTEMP.
+NOTE: There were 1 observations read from the data set WORK.XTEMP_PCTL.
+NOTE: The data set MKN_WORK.TRUNC_FINAL_FUND_DATA has 392044 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.88 seconds
+      cpu time            0.41 seconds
+      
+
+MPRINT(WT):   proc datasets library=work nolist;
+MPRINT(WT):   delete xtemp xtemp_pctl;
+MPRINT(WT):   quit;
+NOTE: Deleting WORK.XTEMP (memtype=DATA).
+NOTE: Deleting WORK.XTEMP_PCTL (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.01 seconds
+      
+
+MPRINT(WT):   run;
+419        
+420        title 'After Truncation';
+421        proc univariate data = mkn_work.trunc_final_fund_data;
+422        var mkt_val_diff weight_diff num_hold_diff pct_net_diff weight_problem;
+423        run;
+
+NOTE: The PROCEDURE UNIVARIATE printed pages 6-10.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           1.21 seconds
+      cpu time            0.75 seconds
+      
+
+424        
+425        ** Final output dataset **;
+426        proc sql;
+427        	create table mktnet.mastmornhold_equities as
+428        	select a.*
+429        	from mkn_work.mornholdings_pared as a, mkn_work.trunc_final_fund_data as b
+430        	where a.fundid = b.fundid and a.port_date=b.port_date;
+NOTE: Table MKTNET.MASTMORNHOLD_EQUITIES created, with 60030476 rows and 32 columns.
+
+431        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           15:44.49
+      cpu time            2:01.19
+      
+
+432        
+433        *test - should equal nobs of trunc_final_fund_data;
+434        proc sort data = mktnet.mastmornhold_equities out = tester nodupkey;
+435        by fundid port_date;
+436        run;
+
+NOTE: There were 60030476 observations read from the data set MKTNET.MASTMORNHOLD_EQUITIES.
+NOTE: 59638432 observations with duplicate key values were deleted.
+NOTE: The data set WORK.TESTER has 392044 observations and 32 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           7:48.58
+      cpu time            57.97 seconds
+      
+
+437        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           23:50.44
+      cpu time            3:02.63
+      

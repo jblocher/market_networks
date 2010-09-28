@@ -1,0 +1,5 @@
+This is an exploratory project, which means it is a bit scattered.
+/data_overall/ is my first cut at organizing the Morningstar data.
+/equities/ subsets the data into equity funds defined as 20% equity or more and then starts matching the holdings CUSIPs various ways.
+
+more to come.
