@@ -1,12 +1,12 @@
-                                           The SAS System    08:36 Wednesday, September 29, 2010   1
+                                           The SAS System    09:59 Wednesday, September 29, 2010   1
 
                                        The CONTENTS Procedure
 
 Data Set Name        WORK.EQUIVALENT_NAME_MATCHED_DATA                  Observations          536974
 Member Type          DATA                                               Variables             6     
 Engine               V9                                                 Indexes               0     
-Created              Wed, Sep 29, 2010 08:37:22 AM                      Observation Length    128   
-Last Modified        Wed, Sep 29, 2010 08:37:22 AM                      Deleted Observations  0     
+Created              Wed, Sep 29, 2010 09:59:55 AM                      Observation Length    128   
+Last Modified        Wed, Sep 29, 2010 09:59:55 AM                      Deleted Observations  0     
 Protection                                                              Compressed            NO    
 Data Set Type                                                           Sorted                NO    
 Label                                                                                               
@@ -23,11 +23,11 @@ First Data Page             1
 Max Obs per Page            127                                                                     
 Obs in First Data Page      107                                                                     
 Number of Data Set Repairs  0                                                                       
-Filename                    /largefs/saswork/SAS_workB479000034D2_bc16-n03.isis.                    
+Filename                    /largefs/saswork/SAS_work5E95000062AE_bc01-n05.isis.                    
                             unc.edu/equivalent_name_matched_data.sas7bdat                           
 Release Created             9.0201M0                                                                
 Host Created                Linux                                                                   
-Inode Number                199068                                                                  
+Inode Number                754795                                                                  
 Access Permission           rw-r-----                                                               
 Owner Name                  jabloche                                                                
 File Size (bytes)           69296128                                                                
@@ -43,7 +43,7 @@ File Size (bytes)           69296128
                     5    rowid        Num       8                              
                     4    security     Char     80                 Security Name
                     6    year         Num       8                              
-                                           The SAS System    08:36 Wednesday, September 29, 2010   2
+                                           The SAS System    09:59 Wednesday, September 29, 2010   2
 
                                        The CONTENTS Procedure
 

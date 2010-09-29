@@ -90,9 +90,9 @@ plus name_matched_data above
 proc sql;
 	CREATE TABLE mkn_work.full_data_added_cusip as
 	SELECT 	a.rowid, a.fundid, a.port_date, a.port_year, b.cusip, a.type_cd, a.security, a.shares, a.sharechange,
-			a.marketvalue, a.weight, a.maturity, a.mat_year, a.coupon, a.type_name, a.prv_port_date, a.num_holdings,
+			a.marketvalue, a.weight, a.maturity, a.mat_year, a.coupon, a.type_name, a.prv_port_date, a.num_holdings, a.tot_investment,
 			a.eq_style_box, a.fi_style_box,
-			a.pct_long_bond, a.pct_long_stock, a.pct_long_preferred, a.pct_long_convertible, a.pct_long_cash, a.pct_long_other
+			a.pct_long_bond, a.pct_long_stock, a.pct_long_preferred, a.pct_long_convertible, a.pct_long_cash, a.pct_long_other,
 			a.pct_net_bond, a.pct_net_stock, a.pct_net_preferred, a.pct_net_convertible, a.pct_net_cash, a.pct_net_other
 	FROM mktnet.equities_no_cusip as a
 	RIGHT JOIN
