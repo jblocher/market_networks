@@ -35,29 +35,29 @@ run;
 
 ** First, we combine all the jobarray output datasets into one;
 
-%combine_matched_data(ds=mkn_work.combined_matched_data,start=2,finish=317);
+*%combine_matched_data(ds=mkn_work.combined_matched_data,start=2,finish=317);
 * NOTE: The data set MKN_WORK.COMBINED_MATCHED_DATA has 612365 observations and 14 variables;
 
 
 
 * should have identical columns but now cusip is updated;
 data name_matched_data (drop = ncusip);
-	set mkn_work.combined_matched_data (drop = comnam totalscore);
+	set mkn_work.combined_matched_data (drop = comnam totalscore CompA CompB FirstLetterA FirstLetterB NAMEDT NAMEENDT);
 	cusip = ncusip;
 run;
 
 data equivalent_name_matched_data;
-	set mkn_work.combined_matched_data (drop = comnam totalscore ncusip);
+	set mkn_work.combined_matched_data (drop = comnam totalscore ncusip CompA CompB FirstLetterA FirstLetterB NAMEDT NAMEENDT);
 run;
 
 * should have identical columns and identical rows;
 proc contents data = equivalent_name_matched_data; run;
-proc contents data = mkn_work.equities_raw; run;
+proc contents data = mktnet.equities_raw; run;
 
 *check it - this should have same nobs as equities_raw because other is a subset;
 proc sql;
 	create table test_union as
-	select * from mkn_work.equities_raw
+	select * from mktnet.equities_raw
 	UNION
 	select * from equivalent_name_matched_data;
 quit;
@@ -72,7 +72,7 @@ now subdivided into name_matched_data and else
 proc sql;
 	create table mkn_work.unmatched_by_crsp_nocusip as
 	select *
-	from mkn_work.equities_raw
+	from mktnet.equities_raw
 	EXCEPT ALL
 	select * from 
 	equivalent_name_matched_data;

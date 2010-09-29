@@ -1,1 +1,0 @@
-bsub -J "namematch[276-317]" -q week -oo "namematch%I.out" sas -stdio 1A_eq_name_match.sas

@@ -1,5 +1,5 @@
 #!/bin/sh
-#BSUB -J "namematch[149,176,179,191,203,226,227,228,230,233,236]"
+#BSUB -J "namematch[105,133,140,155,199,213]"
 #BSUB -q week
 #BSUB -oo "namematch%I.out"
 sas -stdio 1A_eq_name_match.sas 
