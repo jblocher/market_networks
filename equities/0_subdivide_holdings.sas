@@ -17,6 +17,7 @@
 /* Datasets Produced:
  * mktnet.equities_valid_cusip				: Equity holdings with valid CRSP Cusip
  * mktnet.equities_raw						: Equity holdings without a valid CUSIP to be processed by name match
+ * mktnet.equities_no_cusip					: equities_raw but with all of the other columns
  */
 
 /* Plan:
@@ -90,4 +91,7 @@ data mktnet.equities_raw;
 run;
 data mktnet.equities_valid_cusip;
 	set mkn_work.equities_valid_cusip;
+run;
+data mktnet.equities_no_cusip;
+	set mkn_work.equities_no_cusip;
 run;

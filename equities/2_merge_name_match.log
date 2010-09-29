@@ -1,4 +1,4 @@
-1                                                          The SAS System                          19:00 Tuesday, September 28, 2010
+1                                                          The SAS System                        08:36 Wednesday, September 29, 2010
 
 NOTE: Copyright (c) 2002-2008 by SAS Institute Inc., Cary, NC, USA. 
 NOTE: SAS (r) Proprietary Software 9.2 (TS1M0) 
@@ -26,8 +26,8 @@ The command line option "-nonews" will prevent this display.
 
 
 NOTE: SAS initialization used:
-      real time           0.31 seconds
-      cpu time            0.01 seconds
+      real time           0.88 seconds
+      cpu time            0.03 seconds
       
 1          /* *************************************************************************/
 2          /* CREATED BY:      Jesse Blocher (UNC-Chapel Hill)
@@ -98,8 +98,8 @@ NOTE: Libref THOMSON was successfully assigned as follows:
 NOTE: There were 536974 observations read from the data set MKN_WORK.COMBINED_MATCHED_DATA.
 NOTE: The data set WORK.NAME_MATCHED_DATA has 536974 observations and 6 variables.
 NOTE: DATA statement used (Total process time):
-      real time           1:25.20
-      cpu time            0.69 seconds
+      real time           32.00 seconds
+      cpu time            0.71 seconds
       
 
 60         
@@ -111,8 +111,8 @@ NOTE: DATA statement used (Total process time):
 NOTE: There were 536974 observations read from the data set MKN_WORK.COMBINED_MATCHED_DATA.
 NOTE: The data set WORK.EQUIVALENT_NAME_MATCHED_DATA has 536974 observations and 6 variables.
 NOTE: DATA statement used (Total process time):
-      real time           1:28.90
-      cpu time            0.69 seconds
+      real time           18.07 seconds
+      cpu time            0.71 seconds
       
 
 64         
@@ -120,15 +120,15 @@ NOTE: DATA statement used (Total process time):
 66         proc contents data = equivalent_name_matched_data; run;
 
 NOTE: PROCEDURE CONTENTS used (Total process time):
-      real time           0.14 seconds
-      cpu time            0.04 seconds
+      real time           0.09 seconds
+      cpu time            0.03 seconds
       
 NOTE: The PROCEDURE CONTENTS printed page 1.
 
 67         proc contents data = mktnet.equities_raw; run;
 
 NOTE: PROCEDURE CONTENTS used (Total process time):
-      real time           0.14 seconds
+      real time           0.06 seconds
       cpu time            0.01 seconds
       
 NOTE: The PROCEDURE CONTENTS printed page 2.
@@ -144,8 +144,8 @@ NOTE: Table WORK.TEST_UNION created, with 1020331 rows and 6 columns.
 
 75         quit;
 NOTE: PROCEDURE SQL used (Total process time):
-      real time           1:21.87
-      cpu time            5.22 seconds
+      real time           26.13 seconds
+      cpu time            5.34 seconds
       
 
 76         
@@ -157,18 +157,18 @@ NOTE: PROCEDURE SQL used (Total process time):
 82         
 83         *this gets the unmatched portion of the db but only works if whole row is identical;
 84         proc sql;
-85         	create table mkn_work.unmatched_by_crsp_nocusip as
+85         	create table mktnet.equities_unmatched as
 86         	select *
 87         	from mktnet.equities_raw
 88         	EXCEPT ALL
 89         	select * from
 90         	equivalent_name_matched_data;
-NOTE: Table MKN_WORK.UNMATCHED_BY_CRSP_NOCUSIP created, with 483367 rows and 6 columns.
+NOTE: Table MKTNET.EQUITIES_UNMATCHED created, with 483367 rows and 6 columns.
 
 91         quit;
 NOTE: PROCEDURE SQL used (Total process time):
-      real time           1:53.23
-      cpu time            4.23 seconds
+      real time           27.17 seconds
+      cpu time            4.27 seconds
       
 
 92         
@@ -180,16 +180,72 @@ NOTE: PROCEDURE SQL used (Total process time):
 96         plus name_matched_data above
 97         */
 98         
-99         /*
-100        * wont work yet - valid cusip has all holdings, name_matched_data is pared;
-101        * need to merge pared down data with full holdings data by rowid;
-102        data mktnet.valid_cusip_add_crsp_cusip;
-103        	set mktnet.equities_valid_cusip;
-104        run;
-105        proc append base = mktnet.valid_cusip_add_crsp_cusip data = name_matched_data; run;
+99         
+100        * need to merge pared down data with full holdings data by rowid;
+101        * should have same NOBS as name_matched_data;
+102        proc sql;
+103        	CREATE TABLE mkn_work.full_data_added_cusip as
+104        	SELECT 	a.rowid, a.fundid, a.port_date, a.port_year, b.cusip, a.type_cd, a.security,
+104      ! a.shares, a.sharechange,
+105        			a.marketvalue, a.weight, a.maturity, a.mat_year, a.coupon, a.type_name,
+105      ! a.prv_port_date, a.num_holdings,
+106        			a.eq_style_box, a.fi_style_box,
+107        			a.pct_long_bond, a.pct_long_stock, a.pct_long_preferred, a.pct_long_convertible,
+107      ! a.pct_long_cash, a.pct_long_other
+108        			a.pct_net_bond, a.pct_net_stock, a.pct_net_preferred, a.pct_net_convertible,
+              _
+              22
+              76
+108      ! a.pct_net_cash, a.pct_net_other
+ERROR 22-322: Syntax error, expecting one of the following: !, !!, &, *, **, +, ',', -, /, <, <=, 
+              <>, =, >, >=, ?, AND, BETWEEN, CONTAINS, EQ, EQT, GE, GET, GT, GTT, LE, LET, LIKE, 
+              LT, LTT, NE, NET, OR, ^=, |, ||, ~=.  
+
+ERROR 76-322: Syntax error, statement will be ignored.
+
+109        	FROM mktnet.equities_no_cusip as a
+110        	RIGHT JOIN
+111        	name_matched_data as b
+112        	ON a.rowid = b.rowid;
+NOTE: PROC SQL set option NOEXEC and will continue to check the syntax of statements.
+113        	
+114        quit;
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.01 seconds
+      
+115        
+
+
+116        data mktnet.equities_matched;
+117        	set mktnet.equities_valid_cusip;
+118        run;
+
+NOTE: There were 45696912 observations read from the data set MKTNET.EQUITIES_VALID_CUSIP.
+NOTE: The data set MKTNET.EQUITIES_MATCHED has 45696912 observations and 32 variables.
+NOTE: DATA statement used (Total process time):
+      real time           15:12.01
+      cpu time            46.89 seconds
+      
+
+119        
+120        proc append base = mktnet.equities_matched data = mkn_work.full_data_added_cusip; run;
+ERROR: File MKN_WORK.FULL_DATA_ADDED_CUSIP.DATA does not exist.
+
+NOTE: Statements not processed because of errors noted above.
+NOTE: PROCEDURE APPEND used (Total process time):
+      real time           0.98 seconds
+      cpu time            0.00 seconds
+      
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. 
+      This may cause NOTE: No observations in data set.
+
+ERROR: Errors printed on page 1.
 
 NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
 NOTE: The SAS System used:
-      real time           6:11.76
-      cpu time            10.90 seconds
+      real time           16:58.15
+      cpu time            58.03 seconds
       

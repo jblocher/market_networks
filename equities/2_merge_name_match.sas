@@ -70,7 +70,7 @@ now subdivided into name_matched_data and else
 
 *this gets the unmatched portion of the db but only works if whole row is identical;
 proc sql;
-	create table mkn_work.unmatched_by_crsp_nocusip as
+	create table mktnet.equities_unmatched as
 	select *
 	from mktnet.equities_raw
 	EXCEPT ALL
@@ -84,10 +84,25 @@ NOTE: The data set MKTNET.EQUITIES_VALID_CUSIP has 45696912 observations and 32 
 plus name_matched_data above
 */
 
-/*
-* wont work yet - valid cusip has all holdings, name_matched_data is pared;
+
 * need to merge pared down data with full holdings data by rowid;
-data mktnet.valid_cusip_add_crsp_cusip;
+* should have same NOBS as name_matched_data;
+proc sql;
+	CREATE TABLE mkn_work.full_data_added_cusip as
+	SELECT 	a.rowid, a.fundid, a.port_date, a.port_year, b.cusip, a.type_cd, a.security, a.shares, a.sharechange,
+			a.marketvalue, a.weight, a.maturity, a.mat_year, a.coupon, a.type_name, a.prv_port_date, a.num_holdings,
+			a.eq_style_box, a.fi_style_box,
+			a.pct_long_bond, a.pct_long_stock, a.pct_long_preferred, a.pct_long_convertible, a.pct_long_cash, a.pct_long_other
+			a.pct_net_bond, a.pct_net_stock, a.pct_net_preferred, a.pct_net_convertible, a.pct_net_cash, a.pct_net_other
+	FROM mktnet.equities_no_cusip as a
+	RIGHT JOIN
+	name_matched_data as b 
+	ON a.rowid = b.rowid;
+	
+quit;
+
+data mktnet.equities_matched;
 	set mktnet.equities_valid_cusip;
 run;
-proc append base = mktnet.valid_cusip_add_crsp_cusip data = name_matched_data; run;
+
+proc append base = mktnet.equities_matched data = mkn_work.full_data_added_cusip; run;
