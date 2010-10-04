@@ -1,4 +1,4 @@
-1                                                          The SAS System                           10:56 Monday, September 13, 2010
+1                                                          The SAS System                          09:10 Tuesday, September 14, 2010
 
 NOTE: Copyright (c) 2002-2008 by SAS Institute Inc., Cary, NC, USA. 
 NOTE: SAS (r) Proprietary Software 9.2 (TS1M0) 
@@ -26,16 +26,16 @@ The command line option "-nonews" will prevent this display.
 
 
 NOTE: SAS initialization used:
-      real time           0.12 seconds
-      cpu time            0.03 seconds
+      real time           0.32 seconds
+      cpu time            0.04 seconds
       
 1          /* *************************************************************************/
 2          /* CREATED BY:      Jesse Blocher (UNC-Chapel Hill)
 3          /* MODIFIED BY:
-4          /* DATE CREATED:    Aug 2010
-5          /* PROG NAME:       equities.sas
+4          /* DATE CREATED:    Sept 2010
+5          /* PROG NAME:       subdivide_holdings.sas
 6          /* Project:         Market Interconnectedness and Fires Sales, Momentum
-7          /* This File:       Analyze the equity holdings we have - CUSIPs? Compare to Thomson s12.
+7          /* This File:       Divides up our "equity" group - i.e. those portfolios with some nonzero equity holdings.
 8          /************************************************************************************/
 9          
 10         %include 'marketnet_header.sas'; *header file with basic options and libraries;
@@ -61,81 +61,86 @@ NOTE: Libref THOMSON was successfully assigned as follows:
 27          */
 28         
 29         /* Datasets Produced:
-30          *
-31          */
-32         
-33         /*
-34         * OK, so first extract only the equity holdings; */
-35         
-36         data mkn_work.equities_only_w_cusip mkn_work.equities_no_cusip;
-37         	set mktnet.mastmornhold_equities;
-38         	where substr(type_cd,1,1) = 'E'; *starts with E;
-39         	if missing(cusip) then output mkn_work.equities_no_cusip;
-40         	else output mkn_work.equities_only_w_cusip;
-41         run;
+30          * mktnet.equities_valid_cusip				: Equity holdings with valid CRSP Cusip
+31          *
+32          */
+33         
+34         /* Plan:
+35          * 1. Extract Equities
+36          *		1a. Extract valid CUSIPs based on checksum
+37          *		1b. Match names with CRSP
+38          *		1c. Match names with Compustat
+39          * 		1d. How many left? We'll have to see what to do with remainder
+40          * Ditto with Bonds but done elsewhere
+41          */
+42         proc contents data = mktnet.mastmornhold_equities; run;
 
-NOTE: There were 54473691 observations read from the data set MKTNET.MASTMORNHOLD_EQUITIES.
-      WHERE SUBSTR(type_cd, 1, 1)='E';
-NOTE: The data set MKN_WORK.EQUITIES_ONLY_W_CUSIP has 53349364 observations and 32 variables.
-NOTE: The data set MKN_WORK.EQUITIES_NO_CUSIP has 1124327 observations and 32 variables.
-NOTE: DATA statement used (Total process time):
-      real time           19:10.23
-      cpu time            1:29.56
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.49 seconds
+      cpu time            0.05 seconds
       
+NOTE: The PROCEDURE CONTENTS printed page 1.
 
-42         
-43         /*
-44         NOTE: There were 54692087 observations read from the data set MORN.MASTER_MORN_HOLDINGS.
-45               WHERE SUBSTR(type_cd, 1, 1)='E';
-46         NOTE: The data set MKN_WORK.EQUITIES_ONLY_W_CUSIP has 53562277 observations and 49
-46       ! variables.
-47         NOTE: The data set MKN_WORK.EQUITIES_NO_CUSIP has 1129810 observations and 49 variables.
-48         NOTE: DATA statement used (Total process time):
-49               real time           53:35.59
-50               cpu time            1:26.68
-51         */
-52         
-53         proc freq data = mkn_work.equities_no_cusip;
-54         tables port_year type_cd ;
-55         run;
+43         proc freq data = mktnet.mastmornhold_equities;
+44         tables type_cd;
+45         run;
 
-NOTE: There were 1124327 observations read from the data set MKN_WORK.EQUITIES_NO_CUSIP.
-NOTE: The PROCEDURE FREQ printed page 1.
+NOTE: There were 60030476 observations read from the data set MKTNET.MASTMORNHOLD_EQUITIES.
+NOTE: The PROCEDURE FREQ printed page 2.
 NOTE: PROCEDURE FREQ used (Total process time):
-      real time           15.36 seconds
-      cpu time            0.57 seconds
+      real time           5:18.82
+      cpu time            28.05 seconds
       
 
-56         
-57         proc univariate data = mkn_work.equities_no_cusip;
-58         var marketvalue weight;
-59         run;
+46         
+47         * OK, so first extract only the equity holdings, subdivide by CUSIP;
+48         
+49         data mkn_work.equities_only_w_cusip mkn_work.equities_no_cusip;
+50         	set mktnet.mastmornhold_equities;
+51         	where substr(type_cd,1,1) = 'E'; *starts with E;
+52         	if missing(cusip) then output mkn_work.equities_no_cusip;
+53         	else output mkn_work.equities_only_w_cusip;
+54         run;
 
-NOTE: The PROCEDURE UNIVARIATE printed pages 2-3.
-NOTE: PROCEDURE UNIVARIATE used (Total process time):
-      real time           17.61 seconds
-      cpu time            4.05 seconds
+NOTE: There were 46717243 observations read from the data set MKTNET.MASTMORNHOLD_EQUITIES.
+      WHERE SUBSTR(type_cd, 1, 1)='E';
+NOTE: The data set MKN_WORK.EQUITIES_ONLY_W_CUSIP has 45697207 observations and 32 variables.
+NOTE: The data set MKN_WORK.EQUITIES_NO_CUSIP has 1020036 observations and 32 variables.
+NOTE: DATA statement used (Total process time):
+      real time           10:39.56
+      cpu time            1:12.14
       
 
-60         
-61         
-62         proc sql;
-63         	title 'Number of obs missing CUSIP and also description is 46';
-64         	select count(*) as count_desc from
-65         	mkn_work.equities_no_cusip
-66         	where missing(security);
-67         quit;
-NOTE: The PROCEDURE SQL printed page 4.
+55         
+56         /*
+57         NOTE: There were 54692087 observations read from the data set MORN.MASTER_MORN_HOLDINGS.
+58               WHERE SUBSTR(type_cd, 1, 1)='E';
+59         NOTE: The data set MKN_WORK.EQUITIES_ONLY_W_CUSIP has 53562277 observations and 49
+59       ! variables.
+60         NOTE: The data set MKN_WORK.EQUITIES_NO_CUSIP has 1129810 observations and 49 variables.
+61         NOTE: DATA statement used (Total process time):
+62               real time           53:35.59
+63               cpu time            1:26.68
+64         */
+65         
+66         
+67         proc sql;
+68         	title 'Number of obs missing CUSIP and also description is 46';
+69         	select count(*) as count_desc from
+70         	mkn_work.equities_no_cusip
+71         	where missing(security);
+72         quit;
+NOTE: The PROCEDURE SQL printed page 3.
 NOTE: PROCEDURE SQL used (Total process time):
-      real time           0.46 seconds
-      cpu time            0.46 seconds
+      real time           7.98 seconds
+      cpu time            0.49 seconds
       
 
-68         
-69         %include '/netscr/jabloche/util/cusip_validation.sas';
-167        * validate the cusips we do have;
-168        %validateCusips(ds_in=mkn_work.equities_only_w_cusip, cusip=cusip
-168      ! ,ds_out=mkn_work.validate_equity_cusip, valid=validCusip );
+73         
+74         %include '/netscr/jabloche/util/cusip_validation.sas';
+172        * validate the cusips we do have;
+173        %validateCusips(ds_in=mkn_work.equities_only_w_cusip, cusip=cusip
+173      ! ,ds_out=mkn_work.validate_equity_cusip, valid=validCusip );
 SYMBOLGEN:  Macro variable DS_OUT resolves to mkn_work.validate_equity_cusip
 MPRINT(VALIDATECUSIPS):   data mkn_work.validate_equity_cusip (drop = CUSIP9 ninthDigit c1-c8 v1-v8 
 vsum1-vsum8 ind sumDigits checksum);
@@ -507,80 +512,80 @@ MPRINT(VALIDATECUSIPS):   run;
 
 NOTE: Character values have been converted to numeric values at the places given by: 
       (Line):(Column).
-      168:246   168:2     168:2     168:2     168:2     168:2     168:2     168:2     168:2
+      173:246   173:2     173:2     173:2     173:2     173:2     173:2     173:2     173:2
 NOTE: Missing values were generated as a result of performing an operation on missing values.
       Each place is given by: (Number of times) at (Line):(Column).
-      1 at 168:203   1 at 168:219   1 at 168:229   1 at 168:234   1 at 168:236   1 at 168:203
-      1 at 168:219   1 at 168:229   1 at 168:234   1 at 168:236   
-NOTE: There were 53349364 observations read from the data set MKN_WORK.EQUITIES_ONLY_W_CUSIP.
-NOTE: The data set MKN_WORK.VALIDATE_EQUITY_CUSIP has 53349364 observations and 33 variables.
+      1 at 173:203   1 at 173:219   1 at 173:229   1 at 173:234   1 at 173:236   1 at 173:203
+      1 at 173:219   1 at 173:229   1 at 173:234   1 at 173:236   
+NOTE: There were 45697207 observations read from the data set MKN_WORK.EQUITIES_ONLY_W_CUSIP.
+NOTE: The data set MKN_WORK.VALIDATE_EQUITY_CUSIP has 45697207 observations and 33 variables.
 NOTE: DATA statement used (Total process time):
-      real time           22:49.46
-      cpu time            10:53.83
+      real time           12:16.24
+      cpu time            9:49.18
       
 
-169        
-170        
-171        proc univariate data = mkn_work.validate_equity_cusip;
-172        var validCusip;
-173        run;
+174        
+175        
+176        proc univariate data = mkn_work.validate_equity_cusip;
+177        var validCusip;
+178        run;
 
-NOTE: The PROCEDURE UNIVARIATE printed page 5.
+NOTE: The PROCEDURE UNIVARIATE printed page 4.
 NOTE: PROCEDURE UNIVARIATE used (Total process time):
-      real time           10:40.37
-      cpu time            33.28 seconds
+      real time           3:58.62
+      cpu time            29.93 seconds
       
 
-174        /*
-175         = 356 invalid Cusips
-176                          N                    53562277    Sum Weights           53562277
-177                          Mean               0.99999335    Sum Observations      53561921
-178         */
-179        
-180        * Now, combine invalid cusips with no cusip data for name matching;
-181        data mkn_work.equities_valid_cusip (drop = validCusip) invalid_cusip (drop = validCusip);
-182        	set mkn_work.validate_equity_cusip;
-183        	if validCusip = 1 then output mkn_work.equities_valid_cusip;
-184        	else output invalid_cusip;
-185        run;
+179        /*
+180         = 356 invalid Cusips
+181                          N                    53562277    Sum Weights           53562277
+182                          Mean               0.99999335    Sum Observations      53561921
+183         */
+184        
+185        * Now, combine invalid cusips with no cusip data for name matching;
+186        data mkn_work.equities_valid_cusip (drop = validCusip) invalid_cusip (drop = validCusip);
+187        	set mkn_work.validate_equity_cusip;
+188        	if validCusip = 1 then output mkn_work.equities_valid_cusip;
+189        	else output invalid_cusip;
+190        run;
 
-NOTE: There were 53349364 observations read from the data set MKN_WORK.VALIDATE_EQUITY_CUSIP.
-NOTE: The data set MKN_WORK.EQUITIES_VALID_CUSIP has 53349016 observations and 32 variables.
-NOTE: The data set WORK.INVALID_CUSIP has 348 observations and 32 variables.
+NOTE: There were 45697207 observations read from the data set MKN_WORK.VALIDATE_EQUITY_CUSIP.
+NOTE: The data set MKN_WORK.EQUITIES_VALID_CUSIP has 45696912 observations and 32 variables.
+NOTE: The data set WORK.INVALID_CUSIP has 295 observations and 32 variables.
 NOTE: DATA statement used (Total process time):
-      real time           24:47.10
-      cpu time            55.36 seconds
+      real time           7:23.86
+      cpu time            46.74 seconds
       
 
-186        
-187        proc append base = mkn_work.equities_no_cusip data = invalid_cusip;
-188        run;
+191        
+192        proc append base = mkn_work.equities_no_cusip data = invalid_cusip;
+193        run;
 
 NOTE: Appending WORK.INVALID_CUSIP to MKN_WORK.EQUITIES_NO_CUSIP.
-NOTE: There were 348 observations read from the data set WORK.INVALID_CUSIP.
-NOTE: 348 observations added.
-NOTE: The data set MKN_WORK.EQUITIES_NO_CUSIP has 1124675 observations and 32 variables.
+NOTE: There were 295 observations read from the data set WORK.INVALID_CUSIP.
+NOTE: 295 observations added.
+NOTE: The data set MKN_WORK.EQUITIES_NO_CUSIP has 1020331 observations and 32 variables.
 NOTE: PROCEDURE APPEND used (Total process time):
-      real time           0.40 seconds
-      cpu time            0.00 seconds
+      real time           0.10 seconds
+      cpu time            0.01 seconds
       
 
-189        
-190        *keep it simple, just what we need for name matching. Merge the rest back later;
-191        data mkn_work.equities_raw;
-192        	set mkn_work.equities_no_cusip (keep = security cusip port_date fundid rowid);
-193        	year = year(port_date);
-194        run;
+194        
+195        *keep it simple, just what we need for name matching. Merge the rest back later;
+196        data mkn_work.equities_raw;
+197        	set mkn_work.equities_no_cusip (keep = security cusip port_date fundid rowid);
+198        	year = year(port_date);
+199        run;
 
-NOTE: There were 1124675 observations read from the data set MKN_WORK.EQUITIES_NO_CUSIP.
-NOTE: The data set MKN_WORK.EQUITIES_RAW has 1124675 observations and 6 variables.
+NOTE: There were 1020331 observations read from the data set MKN_WORK.EQUITIES_NO_CUSIP.
+NOTE: The data set MKN_WORK.EQUITIES_RAW has 1020331 observations and 6 variables.
 NOTE: DATA statement used (Total process time):
-      real time           2.07 seconds
+      real time           12.09 seconds
       cpu time            1.20 seconds
       
 
 NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
 NOTE: The SAS System used:
-      real time           1:18:03.95
-      cpu time            13:58.35
+      real time           39:58.70
+      cpu time            12:47.83
       

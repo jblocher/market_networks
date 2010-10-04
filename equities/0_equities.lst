@@ -1,207 +1,225 @@
-                                           The SAS System       10:56 Monday, September 13, 2010   1
+                                           The SAS System      09:10 Tuesday, September 14, 2010   1
+
+                                       The CONTENTS Procedure
+
+Data Set Name        MKTNET.MASTMORNHOLD_EQUITIES                     Observations          60030476
+Member Type          DATA                                             Variables             32      
+Engine               V9                                               Indexes               0       
+Created              Tue, Sep 14, 2010 08:19:28 AM                    Observation Length    352     
+Last Modified        Tue, Sep 14, 2010 08:19:28 AM                    Deleted Observations  0       
+Protection                                                            Compressed            NO      
+Data Set Type                                                         Sorted                NO      
+Label                                                                                               
+Data Representation  SOLARIS_X86_64, LINUX_X86_64,                                                  
+                     ALPHA_TRU64, LINUX_IA64                                                        
+Encoding             latin1  Western (ISO)                                                          
+
+
+                                 Engine/Host Dependent Information
+
+       Data Set Page Size          32768                                                     
+       Number of Data Set Pages    652506                                                    
+       First Data Page             1                                                         
+       Max Obs per Page            92                                                        
+       Obs in First Data Page      75                                                        
+       Number of Data Set Repairs  0                                                         
+       Filename                    /largefs/jabloche/marketnet/mastmornhold_equities.sas7bdat
+       Release Created             9.0201M0                                                  
+       Host Created                Linux                                                     
+       Inode Number                912446                                                    
+       Access Permission           rw-r-----                                                 
+       Owner Name                  jabloche                                                  
+       File Size (bytes)           21381324800                                               
+
+
+                             Alphabetic List of Variables and Attributes
+ 
+  #   Variable               Type   Len   Format      Label
+
+ 13   coupon                 Num      8               Coupon if holding is bond in pct             
+  4   cusip                  Char     9               9 digit CUSIP                                
+ 18   eq_style_box           Num      8                                                            
+ 19   fi_style_box           Num      8                                                            
+  1   fundid                 Char    10               Fund ID                                      
+  9   marketvalue            Num      8               Market Value of Shares as reported by manager
+ 12   mat_year               Num      8                                                            
+ 11   maturity               Num      8   YYMMDD10.   Maturity if holding is bond                  
+ 17   num_holdings           Num      8                                                            
+ 21   pct_long_bond          Num      8                                                            
+ 24   pct_long_cash          Num      8                                                            
+ 23   pct_long_convertible   Num      8                                                            
+ 25   pct_long_other         Num      8                                                            
+ 22   pct_long_preferred     Num      8                                                            
+ 20   pct_long_stock         Num      8                                                            
+ 27   pct_net_bond           Num      8                                                            
+ 30   pct_net_cash           Num      8                                                            
+ 29   pct_net_convertible    Num      8                                                            
+ 31   pct_net_other          Num      8                                                            
+ 28   pct_net_preferred      Num      8                                                            
+ 26   pct_net_stock          Num      8                                                            
+  2   port_date              Num      8   YYMMDD10.   Porfolio Date                                
+  3   port_year              Num      8                                                            
+ 15   prv_port_date          Num      8   YYMMDD10.                                                
+ 32   rowid                  Num      8                                                            
+  6   security               Char    80               Security Name                                
+  8   sharechange            Num      8               Change in Shares                             
+  7   shares                 Num      8               Number of Shares Owned                       
+ 16   tot_investment         Num      8               Total Invesment - NAV? Port value?           
+  5   type_cd                Char     2               Asset Type Code                              
+ 14   type_name              Char    32               Asset Type Name                              
+ 10   weight                 Num      8               Portfolio Weight in percentage points        
+                                           The SAS System      09:10 Tuesday, September 14, 2010   2
 
                                          The FREQ Procedure
-
-                                                         Cumulative    Cumulative
-                   port_year    Frequency     Percent     Frequency      Percent
-                   --------------------------------------------------------------
-                        1983         448        0.04           448         0.04  
-                        1984       10074        0.90         10522         0.94  
-                        1985       11409        1.01         21931         1.95  
-                        1986       14273        1.27         36204         3.22  
-                        1987       12678        1.13         48882         4.35  
-                        1988       10297        0.92         59179         5.26  
-                        1989       16076        1.43         75255         6.69  
-                        1990       15571        1.38         90826         8.08  
-                        1991       19300        1.72        110126         9.79  
-                        1992       25966        2.31        136092        12.10  
-                        1993       36948        3.29        173040        15.39  
-                        1994       44537        3.96        217577        19.35  
-                        1995       69536        6.18        287113        25.54  
-                        1996       65649        5.84        352762        31.38  
-                        1997       67960        6.04        420722        37.42  
-                        1998       69067        6.14        489789        43.56  
-                        1999       56665        5.04        546454        48.60  
-                        2000       67766        6.03        614220        54.63  
-                        2001       78350        6.97        692570        61.60  
-                        2002      263295       23.42        955865        85.02  
-                        2003      105047        9.34       1060912        94.36  
-                        2004        9213        0.82       1070125        95.18  
-                        2005        6928        0.62       1077053        95.80  
-                        2006        6454        0.57       1083507        96.37  
-                        2007        9892        0.88       1093399        97.25  
-                        2008       13642        1.21       1107041        98.46  
-                        2009       17286        1.54       1124327       100.00  
-
 
                                           Asset Type Code
  
                                                         Cumulative    Cumulative
                     type_cd    Frequency     Percent     Frequency      Percent
                     ------------------------------------------------------------
-                    E           1024216       91.10       1024216        91.10  
-                    EC             9877        0.88       1034093        91.97  
-                    EI            26256        2.34       1060349        94.31  
-                    EL            36396        3.24       1096745        97.55  
-                    EP             4217        0.38       1100962        97.92  
-                    EQ               13        0.00       1100975        97.92  
-                    ER             1185        0.11       1102160        98.03  
-                    EU             3394        0.30       1105554        98.33  
-                    EV              270        0.02       1105824        98.35  
-                    EW             1398        0.12       1107222        98.48  
-                    EX            17105        1.52       1124327       100.00  
-                                           The SAS System       10:56 Monday, September 13, 2010   2
-
-                                      The UNIVARIATE Procedure
-              Variable:  marketvalue  (Market Value of Shares as reported by manager)
-
-                                              Moments
-
-                  N                     1124327    Sum Weights            1124327
-                  Mean               3676380.91    Sum Observations    4.13345E12
-                  Std Deviation      26810148.3    Variance            7.18784E14
-                  Skewness           71.7426949    Kurtosis            15508.0029
-                  Uncorrected SS     8.23344E20    Corrected SS        8.08148E20
-                  Coeff Variation    729.253821    Std Error Mean      25284.4142
-
-
-                                     Basic Statistical Measures
- 
-                           Location                    Variability
-
-                       Mean      3676381     Std Deviation           26810148
-                       Median     414000     Variance              7.18784E14
-                       Mode            0     Range                 1.04103E10
-                                             Interquartile Range      1776941
-
-
-                                     Tests for Location: Mu0=0
- 
-                          Test           -Statistic-    -----p Value------
-
-                          Student's t    t  145.4011    Pr > |t|    <.0001
-                          Sign           M    527847    Pr >= |M|   <.0001
-                          Signed Rank    S  3.003E11    Pr >= |S|   <.0001
-
-
-                                     Quantiles (Definition 5)
- 
-                                     Quantile         Estimate
-
-                                     100% Max       7394315600
-                                     99%              56449734
-                                     95%              14187397
-                                     90%               6587500
-                                     75% Q3            1850016
-                                     50% Median         414000
-                                     25% Q1              73075
-                                     10%                  9840
-                                     5%                   1001
-                                     1%                -381375
-                                     0% Min        -3015965620
-
-
-                                        Extreme Observations
- 
-                          -------Lowest-------        -------Highest------
- 
-                                Value      Obs              Value      Obs
-
-                          -3015965620    1.1E6         3280358800   1.08E6
-                          -2313425200    1.1E6         3290767400   174304
-                          -1935624916   595177         6690644000   1.08E6
-                          -1880615880   1.09E6         7227840000   1.08E6
-                          -1817221506    1.1E6         7394315600   1.08E6
-                                           The SAS System       10:56 Monday, September 13, 2010   3
-
-                                      The UNIVARIATE Procedure
-                     Variable:  weight  (Portfolio Weight in percentage points)
-
-                                              Moments
-
-                  N                     1124327    Sum Weights            1124327
-                  Mean               0.67252779    Sum Observations     756141.15
-                  Std Deviation      7.88105411    Variance             62.111014
-                  Skewness            -171.5902    Kurtosis            53922.3991
-                  Uncorrected SS     70341553.8    Corrected SS        69833027.9
-                  Coeff Variation    1171.85554    Std Error Mean      0.00743255
-
-
-                                     Basic Statistical Measures
- 
-                           Location                    Variability
-
-                       Mean     0.672528     Std Deviation            7.88105
-                       Median   0.293820     Variance                62.11101
-                       Mode     0.000000     Range                       4579
-                                             Interquartile Range      0.85231
-
-
-                                     Tests for Location: Mu0=0
- 
-                          Test           -Statistic-    -----p Value------
-
-                          Student's t    t  90.48409    Pr > |t|    <.0001
-                          Sign           M    526536    Pr >= |M|   <.0001
-                          Signed Rank    S  2.944E11    Pr >= |S|   <.0001
-
-
-                                     Quantiles (Definition 5)
- 
-                                     Quantile         Estimate
-
-                                     100% Max       1644.80973
-                                     99%               5.60574
-                                     95%               2.63478
-                                     90%               1.80227
-                                     75% Q3            0.90584
-                                     50% Median        0.29382
-                                     25% Q1            0.05353
-                                     10%               0.00744
-                                     5%                0.00070
-                                     1%               -0.82732
-                                     0% Min        -2934.16765
-
-
-                                        Extreme Observations
- 
-                            ------Lowest-----        ------Highest-----
- 
-                               Value      Obs            Value      Obs
-
-                            -2934.17   1.03E6          485.546   1.08E6
-                            -2822.75   1.09E6          499.792   1.08E6
-                            -2263.35   1.08E6          552.357   1.08E6
-                            -2135.17   1.09E6          946.133   1.09E6
-                            -1831.39   1.07E6         1644.810   1.09E6
-                       Number of obs missing CUSIP and also description is 46                      4
-                                                                    10:56 Monday, September 13, 2010
+                    0             70816        0.12         70816         0.12  
+                    1            108355        0.18        179171         0.30  
+                    10            38227        0.06        217398         0.36  
+                    11            10916        0.02        228314         0.38  
+                    2             22256        0.04        250570         0.42  
+                    3             40958        0.07        291528         0.49  
+                    4             25762        0.04        317290         0.53  
+                    5             40100        0.07        357390         0.60  
+                    6             38927        0.06        396317         0.66  
+                    7             23855        0.04        420172         0.70  
+                    8              2232        0.00        422404         0.70  
+                    9             20629        0.03        443033         0.74  
+                    B           4843945        8.07       5286978         8.81  
+                    BA             7068        0.01       5294046         8.82  
+                    BC           163536        0.27       5457582         9.09  
+                    BD           175554        0.29       5633136         9.38  
+                    BE              651        0.00       5633787         9.38  
+                    BF           318389        0.53       5952176         9.92  
+                    BG          1552991        2.59       7505167        12.50  
+                    BH            14660        0.02       7519827        12.53  
+                    BI           729875        1.22       8249702        13.74  
+                    BJ            11211        0.02       8260913        13.76  
+                    BK            69305        0.12       8330218        13.88  
+                    BL            14939        0.02       8345157        13.90  
+                    BM           375841        0.63       8720998        14.53  
+                    BN               24        0.00       8721022        14.53  
+                    BO             5034        0.01       8726056        14.54  
+                    BP             2101        0.00       8728157        14.54  
+                    BQ            11787        0.02       8739944        14.56  
+                    BR            69910        0.12       8809854        14.68  
+                    BS               23        0.00       8809877        14.68  
+                    BT           249699        0.42       9059576        15.09  
+                    BU             2440        0.00       9062016        15.10  
+                    BV               11        0.00       9062027        15.10  
+                    BW              203        0.00       9062230        15.10  
+                    BY           234065        0.39       9296295        15.49  
+                    C            231586        0.39       9527881        15.87  
+                    CB           349700        0.58       9877581        16.45  
+                    CC             2148        0.00       9879729        16.46  
+                    CD             6798        0.01       9886527        16.47  
+                    CF             4874        0.01       9891401        16.48  
+                    CH           192533        0.32      10083934        16.80  
+                    CI            42951        0.07      10126885        16.87  
+                    CL            11081        0.02      10137966        16.89  
+                    CO             1815        0.00      10139781        16.89  
+                    CP           105362        0.18      10245143        17.07  
+                    CQ             2949        0.00      10248092        17.07  
+                    CR            69550        0.12      10317642        17.19  
+                    CS              544        0.00      10318186        17.19  
+                    CT            46802        0.08      10364988        17.27  
+                    CU            56676        0.09      10421664        17.36  
+                    CV              266        0.00      10421930        17.36  
+                    CX                4        0.00      10421934        17.36  
+                    DA             1133        0.00      10423067        17.36  
+                    DB               74        0.00      10423141        17.36  
+                    DC               13        0.00      10423154        17.36  
+                    DD             1025        0.00      10424179        17.36  
+                    DE               18        0.00      10424197        17.36  
+                    DF            57300        0.10      10481497        17.46  
+                    DG              197        0.00      10481694        17.46  
+                    DH             1753        0.00      10483447        17.46  
+                    DI             1464        0.00      10484911        17.47  
+                    DJ              171        0.00      10485082        17.47  
+                    DM              443        0.00      10485525        17.47  
+                    DP                5        0.00      10485530        17.47  
+                    E          46127029       76.84      56612559        94.31  
+                    EC            13030        0.02      56625589        94.33  
+                    EI           228127        0.38      56853716        94.71  
+                    EL            34496        0.06      56888212        94.77  
+                    EP             5068        0.01      56893280        94.77  
+                    EQ           128425        0.21      57021705        94.99  
+                    ER            63454        0.11      57085159        95.09  
+                    EU            28787        0.05      57113946        95.14  
+                    EV              936        0.00      57114882        95.14  
+                    EW            65778        0.11      57180660        95.25  
+                    EX            22113        0.04      57202773        95.29  
+                    FC            29809        0.05      57232582        95.34  
+                    FE            82334        0.14      57314916        95.48  
+                    FM           104353        0.17      57419269        95.65  
+                    FO           352648        0.59      57771917        96.24  
+                    FT           162680        0.27      57934597        96.51  
+                    FV            25052        0.04      57959649        96.55  
+                    IF           102747        0.17      58062396        96.72  
+                    IN                6        0.00      58062402        96.72  
+                    IP               48        0.00      58062450        96.72  
+                    IT            20811        0.03      58083261        96.76  
+                    MF           296511        0.49      58379772        97.25  
+                    MI             1601        0.00      58381373        97.25  
+                    MN            14389        0.02      58395762        97.28  
+                    MQ            31906        0.05      58427668        97.33  
+                    MU            19682        0.03      58447350        97.36  
+                    MV             9615        0.02      58456965        97.38  
+                    MX            26002        0.04      58482967        97.42  
+                    OO               28        0.00      58482995        97.42  
+                    OS             1732        0.00      58484727        97.43  
+                    OT              302        0.00      58485029        97.43  
+                    P            280695        0.47      58765724        97.89  
+                    PA             7541        0.01      58773265        97.91  
+                    PC            55617        0.09      58828882        98.00  
+                    PI            17181        0.03      58846063        98.03  
+                    PK             1341        0.00      58847404        98.03  
+                    PP              119        0.00      58847523        98.03  
+                    Q            852121        1.42      59699644        99.45  
+                    QQ              900        0.00      59700544        99.45  
+                    SA                8        0.00      59700552        99.45  
+                    SC              550        0.00      59701102        99.45  
+                    SD            25143        0.04      59726245        99.49  
+                    SE             5609        0.01      59731854        99.50  
+                    SI            14397        0.02      59746251        99.53  
+                    SQ              391        0.00      59746642        99.53  
+                    SR             7979        0.01      59754621        99.54  
+                    ST              292        0.00      59754913        99.54  
+                    TP            20763        0.03      59775676        99.58  
+                    WR            45350        0.08      59821026        99.65  
+                    YF           209450        0.35      60030476       100.00  
+                       Number of obs missing CUSIP and also description is 46                      3
+                                                                   09:10 Tuesday, September 14, 2010
 
                                              count_desc
                                              ----------
-                                                     43
-                       Number of obs missing CUSIP and also description is 46                      5
-                                                                    10:56 Monday, September 13, 2010
+                                                     44
+                       Number of obs missing CUSIP and also description is 46                      4
+                                                                   09:10 Tuesday, September 14, 2010
 
                                       The UNIVARIATE Procedure
                                        Variable:  validCusip
 
                                               Moments
 
-                  N                    53349364    Sum Weights           53349364
-                  Mean               0.99999348    Sum Observations      53349016
-                  Std Deviation      0.00255402    Variance              6.523E-6
-                  Skewness           -391.53516    Kurtosis            153297.784
-                  Uncorrected SS       53349016    Corrected SS         347.99773
-                  Coeff Variation    0.25540325    Std Error Mean       3.4967E-7
+                  N                    45697207    Sum Weights           45697207
+                  Mean               0.99999354    Sum Observations      45696912
+                  Std Deviation      0.00254077    Variance             6.4555E-6
+                  Skewness           -393.57693    Kurtosis            154900.803
+                  Uncorrected SS       45696912    Corrected SS        294.998096
+                  Coeff Variation    0.25407831    Std Error Mean      3.75855E-7
 
 
                                      Basic Statistical Measures
  
                            Location                    Variability
 
-                       Mean     0.999993     Std Deviation            0.00255
-                       Median   1.000000     Variance                6.523E-6
+                       Mean     0.999994     Std Deviation            0.00254
+                       Median   1.000000     Variance               6.4555E-6
                        Mode     1.000000     Range                    1.00000
                                              Interquartile Range            0
 
@@ -210,9 +228,9 @@
  
                           Test           -Statistic-    -----p Value------
 
-                          Student's t    t   2859817    Pr > |t|    <.0001
-                          Sign           M  26674508    Pr >= |M|   <.0001
-                          Signed Rank    S  7.115E14    Pr >= |S|   <.0001
+                          Student's t    t   2660586    Pr > |t|    <.0001
+                          Sign           M  22848456    Pr >= |M|   <.0001
+                          Signed Rank    S  5.221E14    Pr >= |S|   <.0001
 
 
                                       Quantiles (Definition 5)
@@ -238,8 +256,8 @@
  
                                 Value      Obs        Value      Obs
 
-                                    0   5.33E7            1   5.33E7
-                                    0   5.33E7            1   5.33E7
-                                    0   5.33E7            1   5.33E7
-                                    0   5.33E7            1   5.33E7
-                                    0   5.32E7            1   5.33E7
+                                    0   4.57E7            1   4.57E7
+                                    0   4.57E7            1   4.57E7
+                                    0   4.56E7            1   4.57E7
+                                    0   4.56E7            1   4.57E7
+                                    0   4.56E7            1   4.57E7
