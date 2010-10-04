@@ -34,9 +34,9 @@ tables type_cd;
 run;
 
 proc sql;
-	select distinct type_cd, type name
-	from mktnet.mastermornhold_equities;
-run;
+	select distinct type_cd, type_name
+	from mktnet.mastmornhold_equities;
+quit;
 
 * OK, so first extract only the equity holdings, subdivide by CUSIP;
 /* Did this elsewhere
@@ -47,7 +47,37 @@ data mkn_work.equities_only_w_cusip mkn_work.equities_no_cusip;
 	else output mkn_work.equities_only_w_cusip;
 run;
  */
- 
+
+data mkn_work.not_equities_w_cusip mkn_work.not_equities_no_cusip;
+	set mktnet.mastmornhold_equities;
+	if missing(cusip) then output mkn_work.munis_no_cusip;
+	else output mkn_work.munis_only_w_cusip;
+run;
+
+%include '/netscr/jabloche/util/cusip_validation.sas';
+* validate the cusips we do have;
+%validateCusips(ds_in=mkn_work.not_equities_w_cusip, cusip=cusip ,ds_out=mkn_work.validate_non_equity_cusip, valid=validCusip );
+
+
+proc univariate data = mkn_work.validate_non_equity_cusip;
+var validCusip;
+run;
+/*
+results:
+ */
+
+* Now, combine invalid cusips with no cusip data for name matching;
+data mkn_work.validate_non_equity_cusip (drop = validCusip) invalid_cusip (drop = validCusip);
+	set mkn_work.validate_non_equity_cusip;
+	if validCusip = 1 then output mkn_work.nonequities_valid_cusip;
+	else output invalid_cusip;
+run;
+
+proc append base = mkn_work.not_equities_no_cusip data = invalid_cusip;
+run;
+
+
+/* do this later. Check Cusips first 
 data mkn_work.bonds_only_w_cusip mkn_work.bonds_no_cusip;
 	set mktnet.mastmornhold_equities;
 	where substr(type_cd,1,1) = 'B'; *starts with B for Bonds;
@@ -57,8 +87,9 @@ run;
 
 data mkn_work.munis_only_w_cusip mkn_work.munis_no_cusip;
 	set mktnet.mastmornhold_equities;
-	where position=prxmatch('/d/', type_cd); *type_cd is a numeric digit;
+	where position=prxmatch('/\d/', type_cd); *type_cd is a numeric digit - muni bonds;
 	if missing(cusip) then output mkn_work.munis_no_cusip;
 	else output mkn_work.munis_only_w_cusip;
 run;
+*/
 
